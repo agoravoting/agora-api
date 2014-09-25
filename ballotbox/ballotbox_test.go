@@ -38,8 +38,7 @@ func TestEventApi(t *testing.T) {
 	voteAuth := map[string]string{"Authorization": middleware.AuthHeader("voter-1-1", SharedSecret)}
 
 	newVote := ts.RequestJson("POST", "/api/v1/ballotbox/1/1", http.StatusAccepted, voteAuth, newVote).(map[string]interface{})
-	fmt.Printf("*** %v", newVote)
 
 	foundVote := ts.Request("GET", "/api/v1/ballotbox/1/1/wowowowowo", http.StatusOK, voteAuth, "")
-	fmt.Printf("*** %v", foundVote)
+	fmt.Printf("found vote %v\n", foundVote)
 }

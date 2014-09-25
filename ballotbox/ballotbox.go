@@ -44,7 +44,6 @@ func (bb *BallotBox) Init() (err error) {
 	if bb.insertStmt, err = s.Server.Db.PrepareNamed("INSERT INTO votes (vote, vote_hash, election_id, voter_id) VALUES (:vote, :vote_hash, :election_id, :voter_id) RETURNING id"); err != nil {
 		return
 	}
-
 	if bb.getStmt, err = s.Server.Db.Preparex("SELECT * FROM votes WHERE election_id = $1 and voter_id = $2 and vote_hash = $3"); err != nil {
 		return
 	}

@@ -1,0 +1,1 @@
+This is the elections directory, where each subdirectory holds election specific data.
