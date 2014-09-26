@@ -3,6 +3,7 @@
 import requests
 import json
 import time
+import re
 
 import BaseHTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
@@ -25,6 +26,10 @@ import traceback
 
 import os.path
 import os
+from prettytable import PrettyTable
+
+from sqlalchemy import create_engine, select, func
+from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
 
 PK_TIMEOUT = 60*10 # with three authorities 60 secons was not enough
 TALLY_TIMEOUT = 3600*6 # 6 hours should be enough for what we do :-P
@@ -46,7 +51,48 @@ def getBackendConfig():
     with open(path, 'r') as f:
         config = json.loads(f.read())
 
+    dbConnection = config['DbConnectString']
+    dbParams = dict(re.findall(r'(\S+)=(".*?"|\S+)', dbConnection))
+    config['db'] = dbParams
+
     return config
+
+def votesTable():
+    metadata = MetaData()
+    votes = Table('votes', metadata,
+        Column('id', Integer, primary_key=True),
+        Column('vote', String),
+        Column('vote_hash', String),
+        Column('election_id', String),
+        Column('voter_id', String),
+    )
+    return votes
+
+def showVotes(result):
+    def truncate(data):
+        data = str(data)
+        return (data[:20] + '..') if len(data) > 20 else data
+
+    v = PrettyTable(['id', 'vote', 'vote_hash', 'election_id', 'voter_id'])
+    v.padding_width = 1
+    for row in result:
+        v.add_row(map(truncate, row))
+    print v
+
+def getDbConnection(dbCfg):
+    engine = create_engine('postgresql+psycopg2://%s:%s@localhost/%s' % (dbCfg['user'], dbCfg['password'], dbCfg['dbname']))
+    conn = engine.connect()
+
+    return conn
+
+def loadJson(path):
+    if not os.path.isfile(path):
+        print("%s is not a file" % path)
+        exit(1)
+    with open(path, 'r') as f:
+        ret = json.loads('[' + f.read() + ']')
+
+    return ret
 
 def getElectionConfig(dir, eopeers_dir):
     if not os.path.isdir(dir):
@@ -57,7 +103,7 @@ def getElectionConfig(dir, eopeers_dir):
     if not os.path.isfile(path):
         print("%s is not a file" % path)
         exit(1)
-    print("loading config in %s" % path)
+    print("> loading config in %s" % path)
     with open(path, 'r') as f:
         config = json.loads(f.read())
 
@@ -256,7 +302,7 @@ def hash_file(filePath):
     f.close()
     return hash.hexdigest()
 
-def writeVotes(votesData, filePath):
+def writeJsonVotes(votesData, filePath):
     # forms/election.py:save
     votes = []
     for vote in votesData:
@@ -370,11 +416,10 @@ def downloadTally(config, url):
 
 
 
+''' commands '''
 
-
-''' driving functions '''
-
-def create(config):
+def create(cfg):
+    config = cfg['electionCfg']
     electionId = config['election-id']
     startServer(config['local-port'])
     startData = getStartData(config)
@@ -394,12 +439,13 @@ def create(config):
 
     return pkFile
 
-def encrypt(config):
+def encrypt(cfg):
+    config = cfg['electionCfg']
     electionId = config['election-id']
     pkFile = 'pk_' + electionId
-    votesFile = config['vfile']
-    votesCount = config['vcount']
-    ctexts = 'ctexts_' + electionId
+    votesFile = cfg['plaintexts']
+    votesCount = cfg['vcount']
+    ctexts = cfg['ciphertexts']
 
     print("> Encrypting votes (" + votesFile + ", pk = " + pkFile + ", " + str(votesCount) + ")..")
     pkPath = os.path.join(config['path'], pkFile)
@@ -413,18 +459,19 @@ def encrypt(config):
         parsed = json.loads(output)
 
         print("> Writing file to " + ctextsPath)
-        writeVotes(parsed, ctextsPath)
+        writeJsonVotes(parsed, ctextsPath)
     else:
         print("No public key or votes file, exiting..")
         exit(1)
 
-def tally(config, start_server = True):
+def tally(cfg, start_server = True):
+    config = cfg['electionCfg']
     if(start_server):
         startServer(config['local-port'])
 
     electionId = config['election-id']
 
-    ctexts = 'ctexts_' + electionId
+    ctexts = cfg['ciphertexts']
     ctextsPath = os.path.join(config['path'], ctexts)
 
     # need hash
@@ -442,37 +489,87 @@ def tally(config, start_server = True):
     else:
         print("* Tally not found in http data")
 
-def full(config):
-    electionId = config['election-id']
+def full(cfg):
+    config = cfg['electionCfg']
 
-    pkFile = create(config)
+    pkFile = create(cfg)
 
     if(os.path.isfile(os.path.join(config['path'], pkFile))):
-        encrypt(config)
-        tally(config, False)
+        encrypt(cfg)
+        tally(cfg, False)
     else:
         print("No public key, exiting..")
 
-def main(argv):
+def listVotes(cfg):
+    conn = getDbConnection(cfg['backendCfg']['db'])
+    votes = votesTable()
+    s = select([votes]).where(votes.c.election_id == cfg['electionCfg']['election-id'])
+    result = conn.execute(s)
+    showVotes(result)
 
+def countVotes(cfg):
+    conn = getDbConnection(cfg['backendCfg']['db'])
+    votes = votesTable()
+    s = select([func.count(votes.c.id)]).where(votes.c.election_id == cfg['electionCfg']['election-id'])
+    result = conn.execute(s)
+    row = result.fetchall()
+    print(row[0][0])
+
+def dumpVotes(cfg):
+    conn = getDbConnection(cfg['backendCfg']['db'])
+    votes = votesTable()
+    s = select([votes]).where(votes.c.election_id == cfg['electionCfg']['election-id'])
+    vs = conn.execute(s)
+    file = cfg['ciphertexts']
+    path = os.path.join(cfg['electionCfg']['path'], file)
+    with codecs.open(path, encoding='utf-8', mode='w+') as votes_file:
+        for vote in vs:
+            votes_file.write(vote['vote'] + "\n")
+
+def __loadTestVotes(cfg):
+    conn = getDbConnection(cfg['backendCfg']['db'])
+    votes = votesTable()
+    file = cfg['ciphertexts']
+    path = os.path.join(cfg['electionCfg']['path'], file)
+    with open(path, 'r') as f:
+        vs = f.readlines()
+
+    vs = map(lambda v: {
+        'vote': v,
+        'vote_hash': hashlib.sha512(v).hexdigest(),
+        'election_id': cfg['electionCfg']['election-id'],
+        'voter_id': 'BOGUS' + hashlib.sha224(v).hexdigest()
+    }, vs)
+    conn.execute(votes.insert(), vs)
+    print("> inserted %d votes" % len(vs))
+
+def main(argv):
     parser = argparse.ArgumentParser(description='EO testing script', formatter_class=RawTextHelpFormatter)
     parser.add_argument('command', nargs='+', default='full', help='''create <election_dir>: creates an election
 encrypt <election_dir>: encrypts votes
 tally <election_dir>: launches tally
 full <election_dir>: does the whole process''')
     parser.add_argument('--eopeers-dir', help='directory with the eopeers packages to use as authorities', default = '/etc/eopeers/')
-    parser.add_argument('--vfile', help='json file to read votes from when encrypting', default = 'votes.json')
+    parser.add_argument('--plaintexts', help='json file to read votes from when encrypting', default = 'votes.json')
+    parser.add_argument('--ciphertexts', help='file to write (writeVotes) or read (readVotes) ciphertetxs')
     parser.add_argument('--vcount', help='number of votes to generate (generates duplicates if more than in json file)', type=int, default = 0)
     args = parser.parse_args()
     command = args.command[0]
     if hasattr(__main__, command):
+        # election-specific commands
         if(len(args.command) == 2):
-            config = getElectionConfig(args.command[1], args.eopeers_dir)
+            electionConfig = getElectionConfig(args.command[1], args.eopeers_dir)
             backendConfig = getBackendConfig()
-            print(backendConfig)
-            exit(1)
-            config['vfile'] = args.vfile
+            config = {
+                "backendCfg": backendConfig,
+                "electionCfg": electionConfig
+            }
+            config['plaintexts'] = args.plaintexts
             config['vcount'] = args.vcount
+            if args.ciphertexts is None:
+                config['ciphertexts'] = 'ctexts_' + electionConfig['election-id']
+            else:
+                config['ciphertexts'] = args.ciphertexts
 
             eval(command + "(config)")
         else:
