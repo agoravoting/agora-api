@@ -29,7 +29,7 @@ import os
 from prettytable import PrettyTable
 
 from sqlalchemy import create_engine, select, func
-from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
+from sqlalchemy import Table, Column, Integer, String, TIMESTAMP, MetaData, ForeignKey
 
 PK_TIMEOUT = 60*10 # with three authorities 60 secons was not enough
 TALLY_TIMEOUT = 3600*6 # 6 hours should be enough for what we do :-P
@@ -65,6 +65,8 @@ def votesTable():
         Column('vote_hash', String),
         Column('election_id', String),
         Column('voter_id', String),
+        Column('created', TIMESTAMP),
+        Column('modified', TIMESTAMP),
     )
     return votes
 
@@ -73,7 +75,7 @@ def showVotes(result):
         data = str(data)
         return (data[:20] + '..') if len(data) > 20 else data
 
-    v = PrettyTable(['id', 'vote', 'vote_hash', 'election_id', 'voter_id'])
+    v = PrettyTable(['id', 'vote', 'vote_hash', 'election_id', 'voter_id', 'created', 'modified'])
     v.padding_width = 1
     for row in result:
         v.add_row(map(truncate, row))
@@ -329,6 +331,7 @@ def writeNodeEncryptedVotes(votesData, filePath):
         votes.append(data)
 
     # tasks/election.py:launch_encrypted_tally
+    # this is the format expected by eo, newline separated
     with codecs.open(filePath, encoding='utf-8', mode='w+') as votes_file:
         for vote in votes:
             votes_file.write(json.dumps(vote, sort_keys=True) + "\n")
@@ -474,6 +477,7 @@ def count_votes(cfg):
     row = result.fetchall()
     print(row[0][0])
 
+# dumps votes in the format expected by eo
 def dump_votes(cfg):
     conn = getDbConnection(cfg['backendCfg']['db'])
     votes = votesTable()
@@ -484,11 +488,12 @@ def dump_votes(cfg):
     total = 0
     with codecs.open(path, encoding='utf-8', mode='w+') as votes_file:
         for vote in vs:
-            votes_file.write(vote['vote'])
+            votes_file.write(vote['vote'] + "\n")
             total += 1
 
     print("> dumped %d votes to %s" % (total, path))
 
+# dumps votes a format suitable for backup/restore
 def dump_votes_full(cfg):
     conn = getDbConnection(cfg['backendCfg']['db'])
     votes = votesTable()
@@ -510,7 +515,7 @@ def dump_votes_full(cfg):
 
     print("> dumped %d votes to %s" % (len(data), path))
 
-def __encrypt(cfg):
+def encrypt(cfg):
     config = cfg['electionCfg']
     electionId = config['election-id']
     pkFile = 'pk_' + electionId
@@ -535,13 +540,13 @@ def __encrypt(cfg):
         print("No public key or votes file, exiting..")
         exit(1)
 
-def __full_eo_test(cfg):
+def full_eo_test(cfg):
     config = cfg['electionCfg']
 
     pkFile = create(cfg)
 
     if(os.path.isfile(os.path.join(config['path'], pkFile))):
-        __encrypt(cfg)
+        encrypt(cfg)
         tally(cfg, False)
     else:
         print("No public key, exiting..")
@@ -563,7 +568,8 @@ def __load_test_votes(cfg):
     file = cfg['ciphertexts']
     path = os.path.join(cfg['electionCfg']['path'], file)
     with open(path, 'r') as f:
-        vs = f.readlines()
+        # vs = f.readlines()
+        vs = f.read().splitlines()
 
     vs = map(lambda v: {
         'vote': v,
@@ -578,10 +584,12 @@ def main(argv):
     parser = argparse.ArgumentParser(description='agora-api admin script', formatter_class=RawTextHelpFormatter)
     parser.add_argument('command', nargs='+', help='''create <election_dir>: creates an election
 tally <election_dir>: launches tally
+list_votes <election_dir>: list votes
+count_votes <election_dir>: count votes
 dump_votes <election_dir>: dumps votes ready for eo
 dump_votes_full <election_dir>: dumps votes in local format
-__encrypt <election_dir>: encrypts votes
-__full_eo_test <election_dir>: runs full eo test''')
+encrypt <election_dir>: encrypts votes
+full_eo_test <election_dir>: runs full eo test''')
     parser.add_argument('--eopeers-dir', help='directory with the eopeers packages to use as authorities', default = '/etc/eopeers/')
     parser.add_argument('--ciphertexts', help='file to write ciphertetxs (used in dump, load and encrypt)')
     parser.add_argument('--tally-file', help='the file to save the tally to (used with "tally")')

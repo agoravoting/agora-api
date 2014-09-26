@@ -1,5 +1,7 @@
 === agora-api
 
+* pip install SQLAlchemy, psycopg2, PrettyTable
+
  * eopeers: set public ip, private ip, and hostname at top of file
 
  * mkdir /srv/certs, mkdir /srv/certs/selfsigned/,
@@ -18,7 +20,7 @@
 
     cp cert.pem calist
 
-* eopeers to install authority packages
+* use eopeers to install authority packages
 
 * for an election directory, edit config.json. example value:
 
@@ -50,7 +52,7 @@
 
     The id field is optional, it defaults to the election directory name
 
-* nginx, if localPort is set to 8000 in eotest
+* nginx, if localPort is set to 8000 in admin script
 
     server {
         listen         94.23.34.20:8000;
@@ -62,8 +64,3 @@
     }
 
 * chmod u+x on admin, eopeers
-
-* pip install SQLAlchemy
-* pip install sqlalchemy psycopg2
-* pip install PrettyTable
-
