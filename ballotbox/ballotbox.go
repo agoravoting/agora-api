@@ -23,7 +23,6 @@ type BallotBox struct {
 
 	insertStmt *sqlx.NamedStmt
 	getStmt    *sqlx.Stmt
-	delStmt    *sqlx.Stmt
 }
 
 func (bb *BallotBox) Name() string {
@@ -54,14 +53,7 @@ func (bb *BallotBox) Init() (err error) {
 	return
 }
 
-// lists the available events
-func (bb *BallotBox) list(w http.ResponseWriter, r *http.Request, _ httprouter.Params) *middleware.HandledError {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Hello world!"))
-	return nil
-}
-
-// returns an event
+// returns the vote corresponding to the given hash
 func (bb *BallotBox) get(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
 	var (
 		v   []Vote
@@ -100,51 +92,8 @@ func (bb *BallotBox) get(w http.ResponseWriter, r *http.Request, p httprouter.Pa
 	w.Write(b)
 	return nil
 }
-/*
-func (bb *BallotBox) delete(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
-	var (
-		e   []Event
-		err error
-		id  int64
-	)
 
-	id, err = strconv.ParseInt(p.ByName("id"), 10, 32)
-	if err != nil || id <= 0 {
-		return &middleware.HandledError{Err: err, Code: 400, Message: "Invalid id format", CodedMessage: "invalid-format"}
-	}
-
-	if err = bb.getStmt.Select(&e, id); err != nil {
-		return &middleware.HandledError{Err: err, Code: 500, Message: "Database error", CodedMessage: "error-select"}
-	}
-
-	if len(e) == 0 {
-		return &middleware.HandledError{Err: err, Code: 404, Message: "Not found", CodedMessage: "not-found"}
-	}
-
-	if _, err := bb.delStmt.Exec(id); err != nil {
-		return &middleware.HandledError{Err: err, Code: 500, Message: "Error deleting the data", CodedMessage: "sql-error"}
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	return nil
-}
-*/
-// parses an event from a request.
-func parseVote(r *http.Request) (v Vote, err error) {
-	// 	rb, err := httputil.DumpRequest(r, true)
-	if err != nil {
-		return
-	}
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&v)
-	if err != nil {
-		return
-	}
-	return
-}
-
-// add a new event
+// add a new vote
 func (bb *BallotBox) post(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
 	var (
 		tx    = s.Server.Db.MustBegin()
@@ -187,6 +136,20 @@ func (bb *BallotBox) post(w http.ResponseWriter, r *http.Request, p httprouter.P
 		return &middleware.HandledError{Err: err, Code: 500, Message: "Error returing the id", CodedMessage: "error-return"}
 	}
 	return nil
+}
+
+// parses a vote from a request.
+func parseVote(r *http.Request) (v Vote, err error) {
+	// 	rb, err := httputil.DumpRequest(r, true)
+	if err != nil {
+		return
+	}
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&v)
+	if err != nil {
+		return
+	}
+	return
 }
 
 // add the modules to available modules on startup

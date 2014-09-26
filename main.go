@@ -3,7 +3,7 @@ package main
 import (
 	_ "bitbucket.org/liamstask/goose/lib/goose"
 	s "github.com/agoravoting/agora-http-go/server"
-
+	_ "github.com/agoravoting/agora-api/ballotbox"
 	"flag"
 	"os"
 	"os/signal"
