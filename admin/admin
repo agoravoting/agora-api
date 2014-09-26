@@ -400,9 +400,8 @@ def waitForTally():
 
     return ret
 
-def downloadTally(config, url):
-    fileName = config['election-id'] + '.tar.gz'
-    path = os.path.join(config['path'], fileName)
+def downloadTally(cfg, url):
+    path = os.path.join(config['path'], config['tally-file'])
     print("> Downloading to %s" % path)
     with open(path, 'wb') as handle:
         request = requests.get(url, stream=True, verify=False, cert=(CERT, KEY))
@@ -444,7 +443,7 @@ def encrypt(cfg):
     electionId = config['election-id']
     pkFile = 'pk_' + electionId
     votesFile = cfg['plaintexts']
-    votesCount = cfg['vcount']
+    votesCount = cfg['encrypt-count']
     ctexts = cfg['ciphertexts']
 
     print("> Encrypting votes (" + votesFile + ", pk = " + pkFile + ", " + str(votesCount) + ")..")
@@ -485,7 +484,7 @@ def tally(cfg, start_server = True):
 
     if('tally_url' in tallyResponse):
         print("> Downloading tally from " + tallyResponse['tally_url'])
-        downloadTally(config, tallyResponse['tally_url'])
+        downloadTally(cfg, tallyResponse['tally_url'])
     else:
         print("* Tally not found in http data")
 
@@ -522,9 +521,45 @@ def dumpVotes(cfg):
     vs = conn.execute(s)
     file = cfg['ciphertexts']
     path = os.path.join(cfg['electionCfg']['path'], file)
+    total = 0
     with codecs.open(path, encoding='utf-8', mode='w+') as votes_file:
         for vote in vs:
-            votes_file.write(vote['vote'] + "\n")
+            votes_file.write(vote['vote'])
+            total += 1
+
+    print("> dumped %d votes to %s" % (total, path))
+
+def dumpVotesFull(cfg):
+    conn = getDbConnection(cfg['backendCfg']['db'])
+    votes = votesTable()
+    s = select([votes]).where(votes.c.election_id == cfg['electionCfg']['election-id'])
+    vs = conn.execute(s)
+    data = []
+    for vote in vs:
+        data.append({
+            'vote': vote[1],
+            'vote_hash': vote[2],
+            'election_id': vote[3],
+            'voter_id': vote[4]
+        })
+
+    file = cfg['ciphertexts']
+    path = os.path.join(cfg['electionCfg']['path'], file)
+    with codecs.open(path, encoding='utf-8', mode='w+') as votes_file:
+        votes_file.write(json.dumps(data, sort_keys=True))
+
+    print("> dumped %d votes to %s" % (len(data), path))
+
+def __loadVotesFull(cfg):
+    conn = getDbConnection(cfg['backendCfg']['db'])
+    votes = votesTable()
+    file = cfg['ciphertexts']
+    path = os.path.join(cfg['electionCfg']['path'], file)
+    with open(path, 'r') as f:
+        vs = json.loads(f.read())
+
+    conn.execute(votes.insert(), vs)
+    print("> inserted %d votes" % len(vs))
 
 def __loadTestVotes(cfg):
     conn = getDbConnection(cfg['backendCfg']['db'])
@@ -550,9 +585,10 @@ encrypt <election_dir>: encrypts votes
 tally <election_dir>: launches tally
 full <election_dir>: does the whole process''')
     parser.add_argument('--eopeers-dir', help='directory with the eopeers packages to use as authorities', default = '/etc/eopeers/')
+    parser.add_argument('--ciphertexts', help='file to write ciphertetxs (used in dump, load and encrypt)')
+    parser.add_argument('--tally-file', help='the file to save the tally to)')
     parser.add_argument('--plaintexts', help='json file to read votes from when encrypting', default = 'votes.json')
-    parser.add_argument('--ciphertexts', help='file to write (writeVotes) or read (readVotes) ciphertetxs')
-    parser.add_argument('--vcount', help='number of votes to generate (generates duplicates if more than in json file)', type=int, default = 0)
+    parser.add_argument('--encrypt-count', help='number of votes to generate (generates duplicates if more than in json file)', type=int, default = 0)
     args = parser.parse_args()
     command = args.command[0]
     if hasattr(__main__, command):
@@ -565,7 +601,13 @@ full <election_dir>: does the whole process''')
                 "electionCfg": electionConfig
             }
             config['plaintexts'] = args.plaintexts
-            config['vcount'] = args.vcount
+            config['encrypt-count'] = args.encrypt_count
+
+            if args.tally_file is None:
+                config['tally-file'] = electionConfig['election-id'] + '.tar.gz'
+            else:
+                config['tally-file'] = args.ciphertexts
+
             if args.ciphertexts is None:
                 config['ciphertexts'] = 'ctexts_' + electionConfig['election-id']
             else:

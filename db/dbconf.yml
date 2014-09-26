@@ -1,3 +1,7 @@
 development:
     driver: postgres
     open: user=ballotbox password=ballotbox dbname=ballotbox sslmode=disable
+
+test:
+    driver: postgres
+    open: user=ballotbox password=ballotbox dbname=ballotbox_test sslmode=disable

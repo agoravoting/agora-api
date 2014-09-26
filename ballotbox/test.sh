@@ -1,5 +1,5 @@
 #!/bin/bash
 cd $GOPATH/src/github.com/agoravoting/agora-api
-goose up
+goose -env=test up
 go test github.com/agoravoting/agora-api/ballotbox
-goose down
+goose -env=test down

@@ -22,3 +22,12 @@ go install bitbucket.org/liamstask/goose/cmd/goose
 goose up
 
 go run main.go
+
+
+testing
+=========
+su - postgres
+createdb -O ballotbox ballotbox_test
+
+chmod u+x ballotbox/test.sh
+root@ns205836:~/go/src/github.com/agoravoting/agora-api# ballotbox/test.sh

@@ -21,7 +21,7 @@ var (
 	Config       = `{
 	"Debug": true,
 	"DbMaxIddleConnections": 5,
-	"DbConnectString": "user=ballotbox password=ballotbox dbname=ballotbox sslmode=disable",
+	"DbConnectString": "user=ballotbox password=ballotbox dbname=ballotbox_test sslmode=disable",
 
 	"SharedSecret": "somesecret",
 	"Admins": ["test@example.com"],
@@ -38,6 +38,7 @@ func TestEventApi(t *testing.T) {
 	voteAuth := map[string]string{"Authorization": middleware.AuthHeader("voter-1-1", SharedSecret)}
 
 	newVote := ts.RequestJson("POST", "/api/v1/ballotbox/1/1", http.StatusAccepted, voteAuth, newVote).(map[string]interface{})
+	fmt.Printf("new vote %v\n", newVote)
 
 	foundVote := ts.Request("GET", "/api/v1/ballotbox/1/1/wowowowowo", http.StatusOK, voteAuth, "")
 	fmt.Printf("found vote %v\n", foundVote)
