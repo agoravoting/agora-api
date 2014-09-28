@@ -120,7 +120,7 @@ func (bb *BallotBox) post(w http.ResponseWriter, r *http.Request, p httprouter.P
 	var foo string
 	if err = bb.insertStmt.Get(&foo, vote_json["vote"], vote_json["vote_hash"], vote_json["election_id"], vote_json["voter_id"]); err != nil {
 		tx.Rollback()
-		return &middleware.HandledError{Err: err, Code: 500, Message: "Error calling merge_vote", CodedMessage: "error-upsert"}
+		return &middleware.HandledError{Err: err, Code: 500, Message: "Error calling set_vote", CodedMessage: "error-upsert"}
 	}
 
 	err = tx.Commit()
