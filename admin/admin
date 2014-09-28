@@ -35,18 +35,19 @@ PK_TIMEOUT = 60*10 # with three authorities 60 secons was not enough
 TALLY_TIMEOUT = 3600*6 # 6 hours should be enough for what we do :-P
 CERT = '/srv/certs/selfsigned/cert.pem'
 KEY = '/srv/certs/selfsigned/key-nopass.pem'
+ELECTIONS_DIR = 'elections'
 
 # configuration
 localPort = 8000
 node = '/usr/local/bin/node'
 
-def getLocalHostname():
+def get_local_hostname():
     me = subprocess.check_output(["./eopeers", "--show-mine"])
     pkg = json.loads(me)
 
     return pkg['hostname']
 
-def getBackendConfig():
+def get_backend_config():
     path = os.path.join('..', 'config.json')
     with open(path, 'r') as f:
         config = json.loads(f.read())
@@ -57,7 +58,7 @@ def getBackendConfig():
 
     return config
 
-def votesTable():
+def votes_table():
     metadata = MetaData()
     votes = Table('votes', metadata,
         Column('id', Integer, primary_key=True),
@@ -70,10 +71,10 @@ def votesTable():
     )
     return votes
 
-def showVotes(result):
+def show_votes(result):
     def truncate(data):
         data = str(data)
-        return (data[:20] + '..') if len(data) > 20 else data
+        return (data[:25] + '..') if len(data) > 20 else data
 
     v = PrettyTable(['id', 'vote', 'vote_hash', 'election_id', 'voter_id', 'created', 'modified'])
     v.padding_width = 1
@@ -81,32 +82,25 @@ def showVotes(result):
         v.add_row(map(truncate, row))
     print v
 
-def getDbConnection(dbCfg):
+def get_db_connection(dbCfg):
     engine = create_engine('postgresql+psycopg2://%s:%s@localhost/%s' % (dbCfg['user'], dbCfg['password'], dbCfg['dbname']))
     conn = engine.connect()
 
     return conn
 
-def loadJson(path):
-    if not os.path.isfile(path):
-        print("%s is not a file" % path)
-        exit(1)
-    with open(path, 'r') as f:
-        ret = json.loads('[' + f.read() + ']')
+def get_election_config(dir, eopeers_dir):
+    path = os.path.join(ELECTIONS_DIR, dir)
 
-    return ret
-
-def getElectionConfig(dir, eopeers_dir):
-    if not os.path.isdir(dir):
-        print("%s is not a directory" % dir)
+    if not os.path.isdir(path):
+        print("%s is not a directory" % path)
         exit(1)
 
-    path = os.path.join(dir, "config.json")
-    if not os.path.isfile(path):
-        print("%s is not a file" % path)
+    jsonPath = os.path.join(path, "config.json")
+    if not os.path.isfile(jsonPath):
+        print("%s is not a file" % jsonPath)
         exit(1)
-    print("> loading config in %s" % path)
-    with open(path, 'r') as f:
+    print("> loading config in %s" % jsonPath)
+    with open(jsonPath, 'r') as f:
         config = json.loads(f.read())
 
     if not 'director' in config:
@@ -116,8 +110,7 @@ def getElectionConfig(dir, eopeers_dir):
         print("authorities not found in config")
         exit(1)
 
-    config['path'] = dir
-
+    config['path'] = path
     config["authorities"] = config['authorities'].replace(' ','').split(',')
 
     # if id not present, use directory name
@@ -125,7 +118,7 @@ def getElectionConfig(dir, eopeers_dir):
         config['election-id'] = os.path.basename(os.path.normpath(dir))
 
     # authorities and director
-    auths_data = getAuthData(eopeers_dir)
+    auths_data = get_authdata(eopeers_dir)
 
     authorities = []
     for auth in auths_data:
@@ -149,13 +142,13 @@ def getElectionConfig(dir, eopeers_dir):
     config['auths'] = authorities
 
     # local host, port
-    localHostname = getLocalHostname()
+    localHostname = get_local_hostname()
     config['local-hostname'] = localHostname
     config['local-port'] = localPort
 
     return config
 
-def getTallyData(config):
+def get_tally_data(config):
     return {
         # 'election_id': electionId,
         "callback_url": "http://" + config['local-hostname'] + ":" + str(config['local-port']) + "/receive_tally",
@@ -165,7 +158,7 @@ def getTallyData(config):
     }
 
 
-def _apiUrl(path, auth):
+def _api_url(path, auth):
     '''
     Given a full api (without the initial '/') path and a package dict, returns
     a well formed url
@@ -176,14 +169,14 @@ def _apiUrl(path, auth):
         path=path
     )
 
-def getAuthDataForPost(config):
+def get_authdata_for_post(config):
     i = 1
     ret_data = []
     print("\nusing the following authorities:")
     for auth in config['auths']:
         ret_data.append({
             "name": "Auth%d" %i,
-            "orchestra_url": _apiUrl("api/queues", auth),
+            "orchestra_url": _api_url("api/queues", auth),
             "ssl_cert": auth["ssl_certificate"]
         })
         if i == 1:
@@ -196,7 +189,7 @@ def getAuthDataForPost(config):
 
     return ret_data
 
-def getAuthData(eopeers_dir):
+def get_authdata(eopeers_dir):
     if not os.path.isdir(eopeers_dir):
         print("%s is not a directory" % eopeers_dir)
         exit(1)
@@ -226,7 +219,7 @@ def getStartData(config):
         "questions_data": config['questions_data'],
         "voting_start_date": config['voting_start_date'],
         "voting_end_date": config['voting_end_date'],
-        "authorities": getAuthDataForPost(config)
+        "authorities": get_authdata_for_post(config)
     }
     '''return {
         # "election_id": electionId,
@@ -252,7 +245,7 @@ def getStartData(config):
         }],
         "voting_start_date": "2013-12-06T18:17:14.457000",
         "voting_end_date": "2013-12-09T18:17:14.457000",
-        "authorities": getAuthDataForPost(config)
+        "authorities": get_authdata_for_post(config)
     }'''
 
 # code
@@ -304,7 +297,7 @@ def hash_file(filePath):
     f.close()
     return hash.hexdigest()
 
-def writeNodeEncryptedVotes(votesData, filePath):
+def write_node_votes(votesData, filePath):
     # forms/election.py:save
     votes = []
     for vote in votesData:
@@ -337,14 +330,14 @@ def writeNodeEncryptedVotes(votesData, filePath):
             votes_file.write(json.dumps(vote, sort_keys=True) + "\n")
 
 
-def startServer(port):
+def start_server(port):
     print("> Starting server on port %s" % str(port))
     server = ThreadingHTTPServer(('localhost', port),RequestHandler)
     thread = threading.Thread(target = server.serve_forever)
     thread.daemon = True
     thread.start()
 
-def startElection(config, url, data):
+def start_election(config, url, data):
     # data['election_id'] = electionId
     print("> Creating election " + config['election-id'])
     print(json.dumps(data))
@@ -352,7 +345,7 @@ def startElection(config, url, data):
     r = requests.post(url, data=json.dumps(data), verify=False, cert=(CERT, KEY))
     print("> " + str(r))
 
-def waitForPublicKey():
+def wait_for_publicKey():
     start = time.time()
     cv.acquire()
     cv.wait(PK_TIMEOUT)
@@ -372,7 +365,7 @@ def waitForPublicKey():
 
     return pk
 
-def doTally(config, url, data, votesFile, hash):
+def do_tally(config, url, data, votesFile, hash):
     data['votes_url'] = data['votes_url'] + config['path'] + "/" + votesFile
     data['votes_hash'] = data['votes_hash'] + hash
     data['election_id'] = config['election-id']
@@ -382,7 +375,7 @@ def doTally(config, url, data, votesFile, hash):
     r = requests.post(url, data=json.dumps(data), verify=False, cert=(CERT, KEY))
     print("> " + str(r))
 
-def waitForTally():
+def wait_for_tally():
     start = time.time()
     cv.acquire()
     cv.wait(TALLY_TIMEOUT)
@@ -399,7 +392,7 @@ def waitForTally():
 
     return ret
 
-def downloadTally(cfg, url):
+def download_tally(cfg, url):
     path = os.path.join(cfg['electionCfg']['path'], cfg['tally-file'])
     print("> Downloading to %s" % path)
     with open(path, 'wb') as handle:
@@ -419,12 +412,12 @@ def downloadTally(cfg, url):
 def create(cfg):
     config = cfg['electionCfg']
     electionId = config['election-id']
-    startServer(config['local-port'])
+    start_server(config['local-port'])
     startData = getStartData(config)
-    startUrl = _apiUrl("public_api/election", config['auths'][0])
+    startUrl = _api_url("public_api/election", config['auths'][0])
     print("> requesting election at %s" % startUrl)
-    startElection(config, startUrl, startData)
-    publicKey = waitForPublicKey()
+    start_election(config, startUrl, startData)
+    publicKey = wait_for_publicKey()
     pkFile = 'pk_' + electionId
 
     if(len(publicKey) > 0):
@@ -440,7 +433,7 @@ def create(cfg):
 def tally(cfg, start_server = True):
     config = cfg['electionCfg']
     if(start_server):
-        startServer(config['local-port'])
+        start_server(config['local-port'])
 
     electionId = config['election-id']
 
@@ -450,37 +443,46 @@ def tally(cfg, start_server = True):
     # need hash
     hash = hash_file(ctextsPath)
     print("> Votes hash is " + hash)
-    tallyData = getTallyData(config)
-    tallyUrl = _apiUrl('public_api/tally', config['auths'][0])
-    doTally(config, tallyUrl, tallyData, ctexts, hash)
-    tallyResponse = waitForTally()
+    tallyData = get_tally_data(config)
+    tallyUrl = _api_url('public_api/tally', config['auths'][0])
+    do_tally(config, tallyUrl, tallyData, ctexts, hash)
+    tallyResponse = wait_for_tally()
     print(tallyResponse)
 
     if('tally_url' in tallyResponse):
         print("> Downloading tally from " + tallyResponse['tally_url'])
-        downloadTally(cfg, tallyResponse['tally_url'])
+        download_tally(cfg, tallyResponse['tally_url'])
     else:
         print("* Tally not found in http data")
 
 def list_votes(cfg):
-    conn = getDbConnection(cfg['backendCfg']['db'])
-    votes = votesTable()
+    conn = get_db_connection(cfg['backendCfg']['db'])
+    votes = votes_table()
+    # s = select([votes]).where(votes.c.election_id == cfg['electionCfg']['election-id'])
     s = select([votes]).where(votes.c.election_id == cfg['electionCfg']['election-id'])
+    for filter in cfg['filters']:
+        if "~" in filter:
+            key, value = filter.split("~")
+            s = s.where(getattr(votes.c, key).like(value))
+        else:
+            key, value = filter.split("==")
+            s = s.where(getattr(votes.c, key) == (value))
+
     result = conn.execute(s)
-    showVotes(result)
+    show_votes(result)
 
 def count_votes(cfg):
-    conn = getDbConnection(cfg['backendCfg']['db'])
-    votes = votesTable()
+    conn = get_db_connection(cfg['backendCfg']['db'])
+    votes = votes_table()
     s = select([func.count(votes.c.id)]).where(votes.c.election_id == cfg['electionCfg']['election-id'])
     result = conn.execute(s)
     row = result.fetchall()
     print(row[0][0])
 
 # dumps votes in the format expected by eo
-def dump_votes(cfg):
-    conn = getDbConnection(cfg['backendCfg']['db'])
-    votes = votesTable()
+def dump_votes_eo(cfg):
+    conn = get_db_connection(cfg['backendCfg']['db'])
+    votes = votes_table()
     s = select([votes]).where(votes.c.election_id == cfg['electionCfg']['election-id'])
     vs = conn.execute(s)
     file = cfg['ciphertexts']
@@ -495,8 +497,8 @@ def dump_votes(cfg):
 
 # dumps votes a format suitable for backup/restore
 def dump_votes_full(cfg):
-    conn = getDbConnection(cfg['backendCfg']['db'])
-    votes = votesTable()
+    conn = get_db_connection(cfg['backendCfg']['db'])
+    votes = votes_table()
     s = select([votes]).where(votes.c.election_id == cfg['electionCfg']['election-id'])
     vs = conn.execute(s)
     data = []
@@ -535,12 +537,12 @@ def encrypt(cfg):
         parsed = json.loads(output)
 
         print("> Writing file to " + ctextsPath)
-        writeNodeEncryptedVotes(parsed, ctextsPath)
+        write_node_votes(parsed, ctextsPath)
     else:
         print("No public key or votes file, exiting..")
         exit(1)
 
-def full_eo_test(cfg):
+def eotest(cfg):
     config = cfg['electionCfg']
 
     pkFile = create(cfg)
@@ -551,9 +553,40 @@ def full_eo_test(cfg):
     else:
         print("No public key, exiting..")
 
+def list_elections(args):
+    e = PrettyTable(['election id','director', 'authorities', 'pk', 'ctexts', 'tally'])
+    elections = []
+    for item in os.listdir(ELECTIONS_DIR):
+        dir = os.path.join(ELECTIONS_DIR, item)
+        if os.path.isdir(dir):
+            jsonPath = os.path.join(dir, "config.json")
+            if os.path.isfile(jsonPath):
+                with open(jsonPath, 'r') as f:
+                    config = json.loads(f.read())
+                    if not 'election-id' in config:
+                        config['election-id'] = os.path.basename(os.path.normpath(dir))
+
+                    pkPath = os.path.join(dir, "pk_" + config['election-id'])
+                    config['pk'] = os.path.isfile(pkPath)
+                    ctextsPath = os.path.join(dir, "ctexts_" + config['election-id'])
+                    config['ctexts'] = os.path.isfile(ctextsPath)
+                    tallyPath = os.path.join(dir, config['election-id'] + ".tar.gz")
+                    config['tally'] = os.path.isfile(tallyPath)
+
+                    e.add_row([
+                        config['election-id'],
+                        config['director'],
+                        config['authorities'],
+                        config['pk'],
+                        config['ctexts'],
+                        config['tally']
+                    ])
+
+    print e
+
 def __load_votes_full(cfg):
-    conn = getDbConnection(cfg['backendCfg']['db'])
-    votes = votesTable()
+    conn = get_db_connection(cfg['backendCfg']['db'])
+    votes = votes_table()
     file = cfg['ciphertexts']
     path = os.path.join(cfg['electionCfg']['path'], file)
     with open(path, 'r') as f:
@@ -562,9 +595,9 @@ def __load_votes_full(cfg):
     conn.execute(votes.insert(), vs)
     print("> inserted %d votes" % len(vs))
 
-def __load_test_votes(cfg):
-    conn = getDbConnection(cfg['backendCfg']['db'])
-    votes = votesTable()
+def __load_node_votes(cfg):
+    conn = get_db_connection(cfg['backendCfg']['db'])
+    votes = votes_table()
     file = cfg['ciphertexts']
     path = os.path.join(cfg['electionCfg']['path'], file)
     with open(path, 'r') as f:
@@ -585,49 +618,49 @@ def main(argv):
     parser.add_argument('command', nargs='+', help='''create <election_dir>: creates an election
 tally <election_dir>: launches tally
 list_votes <election_dir>: list votes
+list_elections: list elections (under ELECTIONS_DIR)
 count_votes <election_dir>: count votes
-dump_votes <election_dir>: dumps votes ready for eo
+dump_votes_eo <election_dir>: dumps votes ready for eo
 dump_votes_full <election_dir>: dumps votes in local format
-encrypt <election_dir>: encrypts votes
-full_eo_test <election_dir>: runs full eo test''')
+eotest <election_dir>: runs a full eo test cycle''')
     parser.add_argument('--eopeers-dir', help='directory with the eopeers packages to use as authorities', default = '/etc/eopeers/')
     parser.add_argument('--ciphertexts', help='file to write ciphertetxs (used in dump, load and encrypt)')
     parser.add_argument('--tally-file', help='the file to save the tally to (used with "tally")')
     parser.add_argument('--plaintexts', help='json file to read votes from when encrypting', default = 'votes.json')
     parser.add_argument('--encrypt-count', help='number of votes to encrypt (generates duplicates if more than in json file)', type=int, default = 0)
+    parser.add_argument('-f', '--filters', nargs='+', default=[], help="key==value(s) filters for queries (use ~ for like)")
     args = parser.parse_args()
     command = args.command[0]
     if hasattr(__main__, command):
-        # election-specific commands
-        if(len(args.command) == 2):
-            electionConfig = getElectionConfig(args.command[1], args.eopeers_dir)
-            backendConfig = getBackendConfig()
-            config = {
-                "backendCfg": backendConfig,
-                "electionCfg": electionConfig
-            }
-            config['plaintexts'] = args.plaintexts
-            config['encrypt-count'] = args.encrypt_count
+        backendConfig = get_backend_config()
+        config = {
+            "backendCfg": backendConfig
+        }
 
-            if args.tally_file is None:
-                config['tally-file'] = electionConfig['election-id'] + '.tar.gz'
+        if command not in ["list_elections"]:
+            # election-specific commands
+            if len(args.command) == 2:
+                electionConfig = get_election_config(args.command[1], args.eopeers_dir)
+                config['electionCfg'] = electionConfig
+
+                config['plaintexts'] = args.plaintexts
+                config['encrypt-count'] = args.encrypt_count
+                config['filters'] = args.filters
+                if args.tally_file is None:
+                    config['tally-file'] = electionConfig['election-id'] + '.tar.gz'
+                else:
+                    config['tally-file'] = args.tally_file
+
+                if args.ciphertexts is None:
+                    config['ciphertexts'] = 'ctexts_' + electionConfig['election-id']
+                else:
+                    config['ciphertexts'] = args.ciphertexts
             else:
-                config['tally-file'] = args.tally_file
+                parser.print_help()
+                exit(1)
 
-            if args.ciphertexts is None:
-                config['ciphertexts'] = 'ctexts_' + electionConfig['election-id']
-            else:
-                config['ciphertexts'] = args.ciphertexts
+        eval(command + "(config)")
 
-            eval(command + "(config)")
-        else:
-            parser.print_help()
-        '''if(command == 'create') or (command == 'full'):
-            args.electionId = str(time.time()).replace(".", "")
-        elif(len(args.command) == 2):
-            args.electionId = args.command[1]
-
-        eval(command + "(args)")'''
     else:
         parser.print_help()
 

@@ -10,6 +10,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"time"
+
+	"flag"
+	"strconv"
+	"os"
 )
 
 const (
@@ -20,6 +24,8 @@ const (
 )
 
 var (
+	port int
+	// sharedsecret duplicated here, once used in below test, the other in config passed to server, must match.
 	SharedSecret = "somesecret"
 	Config       = `{
 	"Debug": true,
@@ -41,6 +47,8 @@ func TestAgoraApi(t *testing.T) {
 	voteAuth := map[string]string{"Authorization": middleware.AuthHeader("voter-1-1", SharedSecret)}
 
 	posted := ts.RequestJson("POST", "/api/v1/ballotbox/1/1", http.StatusAccepted, voteAuth, newVote)
+	fmt.Printf("new vote %v\n", posted)
+	posted = ts.RequestJson("POST", "/api/v1/ballotbox/1/1", http.StatusAccepted, voteAuth, newVote)
 	fmt.Printf("new vote %v\n", posted)
 
 	foundVote := ts.Request("GET", "/api/v1/ballotbox/1/1/hash", http.StatusOK, voteAuth, "")
@@ -66,7 +74,6 @@ func request(method string, path string, headers map[string]string, requesTBody 
 }
 
 func BenchmarkApi(b *testing.B) {
-
     confStr, err := util.Contents("../config.json")
     if err != nil {
         b.Errorf("error reading config %v", err)
@@ -80,15 +87,12 @@ func BenchmarkApi(b *testing.B) {
     }
 
     secret := s["SharedSecret"].(string)
-    port := s["Port"].(float64)
-
-    // voteAuth := map[string]string{"Authorization": middleware.AuthHeader("voter-1-1", secret)}
 	b.ResetTimer()
     for i := 0; i < b.N; i++ {
         now := time.Now()
         voterId := now.Nanosecond()
         header := fmt.Sprintf("voter-1-%d", voterId)
-        url := fmt.Sprintf("http://localhost:%d/api/v1/ballotbox/1/%d", int(port), voterId)
+        url := fmt.Sprintf("http://localhost:%d/api/v1/ballotbox/1/%d", port, voterId)
         voteAuth := map[string]string{"Authorization": middleware.AuthHeader(header, secret)}
         resp := request("POST", url, voteAuth, newVote, b)
         if resp != nil && resp.StatusCode != http.StatusAccepted {
@@ -96,4 +100,17 @@ func BenchmarkApi(b *testing.B) {
         }
     }
     return
+}
+
+// used to parse command line arguments (see http://golang.org/pkg/flag/ example)
+func init() {
+	var err error
+
+	addr := flag.String("addr", "3000", "http service address")
+	flag.Parse()
+	fmt.Printf("running against port %v..\n", *addr)
+	port, err = strconv.Atoi(*addr); if err != nil {
+    	fmt.Printf("*** error parsing port %v\n", err)
+        os.Exit(1)
+    }
 }

@@ -3,14 +3,11 @@ package ballotbox
 import (
 	"github.com/agoravoting/agora-http-go/middleware"
 	s "github.com/agoravoting/agora-http-go/server"
-	"github.com/agoravoting/agora-http-go/util"
 	"github.com/codegangsta/negroni"
 	"github.com/jmoiron/sqlx"
 	"github.com/julienschmidt/httprouter"
-	// 	"net/http/httputil"
 	"encoding/json"
 	"net/http"
-	"fmt"
 )
 
 const (
@@ -21,7 +18,7 @@ type BallotBox struct {
 	router *httprouter.Router
 	name   string
 
-	insertStmt *sqlx.NamedStmt
+	insertStmt *sqlx.Stmt
 	getStmt    *sqlx.Stmt
 }
 
@@ -40,7 +37,7 @@ func (bb *BallotBox) Init() (err error) {
 		s.Server.CheckPerms("voter-${election_id}-${voter_id}", SESSION_EXPIRE)))
 
 	// setup prepared sql queries
-	if bb.insertStmt, err = s.Server.Db.PrepareNamed("INSERT INTO votes (vote, vote_hash, election_id, voter_id) VALUES (:vote, :vote_hash, :election_id, :voter_id) RETURNING id"); err != nil {
+	if bb.insertStmt, err = s.Server.Db.Preparex("SELECT set_vote($1, $2, $3, $4)"); err != nil {
 		return
 	}
 	if bb.getStmt, err = s.Server.Db.Preparex("SELECT id, vote, vote_hash, election_id, voter_id FROM votes WHERE election_id = $1 and voter_id = $2 and vote_hash = $3"); err != nil {
@@ -98,7 +95,6 @@ func (bb *BallotBox) post(w http.ResponseWriter, r *http.Request, p httprouter.P
 	var (
 		tx    = s.Server.Db.MustBegin()
 		vote  Vote
-		id    int
 		err   error
 	)
 	vote, err = parseVote(r)
@@ -121,20 +117,22 @@ func (bb *BallotBox) post(w http.ResponseWriter, r *http.Request, p httprouter.P
 	vote_json["election_id"] = electionId
 	vote_json["voter_id"] = voterId
 
-	if err = tx.NamedStmt(bb.insertStmt).QueryRowx(vote_json).Scan(&id); err != nil {
+	var foo string
+	if err = bb.insertStmt.Get(&foo, vote_json["vote"], vote_json["vote_hash"], vote_json["election_id"], vote_json["voter_id"]); err != nil {
 		tx.Rollback()
-		return &middleware.HandledError{Err: err, Code: 500, Message: fmt.Sprintf("Error inserting the vote: %s", err), CodedMessage: "error-insert"}
+		return &middleware.HandledError{Err: err, Code: 500, Message: "Error calling merge_vote", CodedMessage: "error-upsert"}
 	}
+
 	err = tx.Commit()
 	if err != nil {
 		tx.Rollback()
 		return &middleware.HandledError{Err: err, Code: 500, Message: "Error comitting the vote", CodedMessage: "error-commit"}
 	}
 
-	// return id
-	if err = util.WriteIdJson(w, id); err != nil {
-		return &middleware.HandledError{Err: err, Code: 500, Message: "Error returing the id", CodedMessage: "error-return"}
-	}
+	w.WriteHeader(http.StatusAccepted)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte("{}"))
+
 	return nil
 }
 
