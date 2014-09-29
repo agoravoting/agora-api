@@ -1,4 +1,4 @@
-=== agora-api
+==== agora-api
 
 Set up admin
 
@@ -10,15 +10,15 @@ Set up admin
 
 * create self signed certificate:
 
-  openssl req -nodes -x509 -newkey rsa:4096 -keyout key-nopass.pem -out cert.pem -days 365 <<EOF
-  ${C}
-  ${ST}
-  ${L}
-  ${O}
-  ${OU}
-  ${CN}
-  ${EMAIL}
-  EOF
+    openssl req -nodes -x509 -newkey rsa:4096 -keyout key-nopass.pem -out cert.pem -days 365 <<EOF
+    ${C}
+    ${ST}
+    ${L}
+    ${O}
+    ${OU}
+    ${CN}
+    ${EMAIL}
+    EOF
 
   cp cert.pem calist
 
