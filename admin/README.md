@@ -1,5 +1,9 @@
 agora-api admin
 ===============
+The python admin script provides administration functionality for agora-api.
+
+Installation
+============
 
 Python dependencies
 
@@ -26,7 +30,7 @@ Create self signed certificate
     ${EMAIL}
     EOF
 
-  cp cert.pem calist
+    cp cert.pem calist
 
 Make scripts executable
 
@@ -34,7 +38,7 @@ Make scripts executable
 
 Use eopeers to install authority packages
 
-    eopeers --install ..
+    ./eopeers --install ..
 
 In an election directory edit config.json. example value
 
