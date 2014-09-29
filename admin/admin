@@ -36,16 +36,13 @@ TALLY_TIMEOUT = 3600*6 # 6 hours should be enough for what we do :-P
 CERT = '/srv/certs/selfsigned/cert.pem'
 KEY = '/srv/certs/selfsigned/key-nopass.pem'
 ELECTIONS_DIR = 'elections'
-
-# configuration
-localPort = 8000
 node = '/usr/local/bin/node'
 
-def get_local_hostname():
+def get_local_hostport():
     me = subprocess.check_output(["./eopeers", "--show-mine"])
     pkg = json.loads(me)
 
-    return pkg['hostname']
+    return pkg['hostname'], pkg['port']
 
 def get_backend_config():
     path = os.path.join('..', 'config.json')
@@ -142,7 +139,7 @@ def get_election_config(dir, eopeers_dir):
     config['auths'] = authorities
 
     # local host, port
-    localHostname = get_local_hostname()
+    localHostname, localPort = get_local_hostport()
     config['local-hostname'] = localHostname
     config['local-port'] = localPort
 

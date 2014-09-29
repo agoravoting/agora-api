@@ -11,7 +11,7 @@ VERSION = 1
 PUBLIC_IP_ADDRESS = "94.23.34.20"
 PRIVATE_IP_ADDRESS = "192.168.0.2"
 HOSTNAME = "vota.podemos.info"
-PORT = 5000
+PORT = 8000
 
 
 def _validate_package(el_json):

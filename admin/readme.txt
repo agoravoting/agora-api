@@ -1,8 +1,8 @@
 === agora-api
 
-* pip install SQLAlchemy, psycopg2, PrettyTable
+* pip install SQLAlchemy, psycopg2, PrettyTable, argsparse, requests
 
- * eopeers: set public ip, private ip, and hostname at top of file
+ * eopeers: set public ip, private ip, hostname, port at top of file
 
  * mkdir /srv/certs, mkdir /srv/certs/selfsigned/,
 
