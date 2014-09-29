@@ -25,6 +25,7 @@ const (
 
 var (
 	port int
+    host *string
 	// sharedsecret duplicated here, once used in below test, the other in config passed to server, must match.
 	SharedSecret = "somesecret"
 	Config       = `{
@@ -94,7 +95,7 @@ func BenchmarkApi(b *testing.B) {
 			now := time.Now()
 	    	voterId := now.Nanosecond()
 	    	header := fmt.Sprintf("voter-1-%d", voterId)
-	    	url := fmt.Sprintf("http://localhost:%d/api/v1/ballotbox/1/%d", port, voterId)
+	    	url := fmt.Sprintf("http://%s:%d/api/v1/ballotbox/1/%d", *host, port, voterId)
 	    	voteAuth := map[string]string{"Authorization": middleware.AuthHeader(header, secret)}
 	    	resp := request("POST", url, voteAuth, newVote, b)
 	    	if resp != nil && resp.StatusCode != http.StatusAccepted {
@@ -112,7 +113,7 @@ func BenchmarkApi(b *testing.B) {
 	    		now := time.Now()
 	        	voterId := now.Nanosecond()
 	        	header := fmt.Sprintf("voter-1-%d", voterId)
-	        	url := fmt.Sprintf("http://localhost:%d/api/v1/ballotbox/1/%d", port, voterId)
+	        	url := fmt.Sprintf("http://%s:%d/api/v1/ballotbox/1/%d", host, port, voterId)
 	        	voteAuth := map[string]string{"Authorization": middleware.AuthHeader(header, secret)}
 	        	resp := request("POST", url, voteAuth, newVote, b)
 	        	if resp != nil && resp.StatusCode != http.StatusAccepted {
@@ -136,9 +137,10 @@ func BenchmarkApi(b *testing.B) {
 func init() {
 	var err error
 
-	addr := flag.String("addr", "3000", "http service address")
+	addr := flag.String("port", "3000", "http port")
+    host = flag.String("host", "localhost", "http host address")
 	flag.Parse()
-	fmt.Printf("running against port %v..\n", *addr)
+	fmt.Printf("running against %s port %v..\n", *host, *addr)
 	port, err = strconv.Atoi(*addr); if err != nil {
     	fmt.Printf("*** error parsing port %v\n", err)
         os.Exit(1)

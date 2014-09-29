@@ -3,6 +3,7 @@ package ballotbox
 import (
 	"encoding/json"
 	"github.com/agoravoting/agora-http-go/util"
+	"time"
 )
 
 type Vote struct {
@@ -11,6 +12,10 @@ type Vote struct {
 	VoteHash        string  	`json:"vote_hash" db:"vote_hash"`
 	ElectionId      string  	`json:"-" db:"election_id"`
 	VoterId       	string  	`json:"-" db:"voter_id"`
+	Ip       	    string  	`json:"-" db:"ip"`
+	Created       	time.Time  	`json:"-" db:"created"`
+	Modified	    time.Time  	`json:"-" db:"modified"`
+	WriteCount	    int64  	    `json:"-" db:"write_count"`
 }
 
 func ParseEvent(data []byte) (v *Vote, err error) {

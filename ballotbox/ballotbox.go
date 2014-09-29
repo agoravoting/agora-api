@@ -37,7 +37,7 @@ func (bb *BallotBox) Init() (err error) {
 		s.Server.CheckPerms("voter-${election_id}-${voter_id}", SESSION_EXPIRE)))
 
 	// setup prepared sql queries
-	if bb.insertStmt, err = s.Server.Db.Preparex("SELECT set_vote($1, $2, $3, $4)"); err != nil {
+	if bb.insertStmt, err = s.Server.Db.Preparex("SELECT set_vote($1, $2, $3, $4, $5)"); err != nil {
 		return
 	}
 	if bb.getStmt, err = s.Server.Db.Preparex("SELECT id, vote, vote_hash, election_id, voter_id FROM votes WHERE election_id = $1 and voter_id = $2 and vote_hash = $3"); err != nil {
@@ -70,6 +70,7 @@ func (bb *BallotBox) get(w http.ResponseWriter, r *http.Request, p httprouter.Pa
 	if voteHash == "" {
 		return &middleware.HandledError{Err: err, Code: 400, Message: "Invalid hash format", CodedMessage: "invalid-format"}
 	}
+
 
 	if err = bb.getStmt.Select(&v, electionId, voterId, voteHash); err != nil {
 		return &middleware.HandledError{Err: err, Code: 500, Message: "Database error", CodedMessage: "error-select"}
@@ -108,6 +109,8 @@ func (bb *BallotBox) post(w http.ResponseWriter, r *http.Request, p httprouter.P
 
 	electionId := p.ByName("election_id")
 	voterId := p.ByName("voter_id")
+	ip := r.RemoteAddr
+
 	if electionId == "" {
 		return &middleware.HandledError{Err: err, Code: 400, Message: "No election_id", CodedMessage: "error-insert"}
 	}
@@ -118,7 +121,7 @@ func (bb *BallotBox) post(w http.ResponseWriter, r *http.Request, p httprouter.P
 	vote_json["voter_id"] = voterId
 
 	var foo string
-	if err = bb.insertStmt.Get(&foo, vote_json["vote"], vote_json["vote_hash"], vote_json["election_id"], vote_json["voter_id"]); err != nil {
+	if err = bb.insertStmt.Get(&foo, vote_json["vote"], vote_json["vote_hash"], vote_json["election_id"], vote_json["voter_id"], ip); err != nil {
 		tx.Rollback()
 		return &middleware.HandledError{Err: err, Code: 500, Message: "Error calling set_vote", CodedMessage: "error-upsert"}
 	}

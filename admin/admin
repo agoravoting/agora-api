@@ -147,7 +147,7 @@ def get_election_config(dir, eopeers_dir):
 
 def get_tally_data(config):
     return {
-        # 'election_id': electionId,
+        "election_id": config['election-id'],
         "callback_url": "http://" + config['local-hostname'] + ":" + str(config['local-port']) + "/receive_tally",
         "extra": [],
         "votes_url": "http://" + config['local-hostname'] + ":" + str(config['local-port']) + "/",
@@ -218,34 +218,6 @@ def getStartData(config):
         "voting_end_date": config['voting_end_date'],
         "authorities": get_authdata_for_post(config)
     }
-    '''return {
-        # "election_id": electionId,
-        "callback_url": "http://" + config['local-hostname'] + ":" + str(config['local-port']) + "/key_done",
-        "is_recurring": False,
-        "extra": [],
-        "title": "Test election",
-        "url": "https://example.com/election/url",
-        "description": "election description",
-        "questions_data": [{
-            "question": "Who Should be President?",
-            "tally_type": "ONE_CHOICE",
-            # "answers": ["Alice", "Bob"],
-            "answers": [
-                {'a': 'ballot/answer',
-                'details': '',
-                'value': 'Alice'},
-                {'a': 'ballot/answer',
-                'details': '',
-                'value': 'Bob'}
-            ],
-            "max": 1, "min": 0
-        }],
-        "voting_start_date": "2013-12-06T18:17:14.457000",
-        "voting_end_date": "2013-12-09T18:17:14.457000",
-        "authorities": get_authdata_for_post(config)
-    }'''
-
-# code
 
 # thread signalling
 cv = threading.Condition()
@@ -272,7 +244,6 @@ class RequestHandler(SimpleHTTPRequestHandler):
         print(raw)
         data = json.loads(raw)
 
-        # print(data)
         self.send_response(200)
         cv.acquire()
         cv.done = True
@@ -365,7 +336,7 @@ def wait_for_publicKey():
 def do_tally(config, url, data, votesFile, hash):
     data['votes_url'] = data['votes_url'] + config['path'] + "/" + votesFile
     data['votes_hash'] = data['votes_hash'] + hash
-    data['election_id'] = config['election-id']
+    # data['election_id'] = config['election-id']
     # print("> Tally post with " + json.dumps(data))
     print("> Requesting tally..")
     cv.done = False

@@ -18,7 +18,9 @@ eopeers: set public ip, private ip, hostname, port at top of file
 
 Create self signed certificate
 
-    mkdir /srv/certs, mkdir /srv/certs/selfsigned/,
+    mkdir /srv/certs
+    mkdir /srv/certs/selfsigned/
+    cd /srv/certs/selfsigned/
 
     openssl req -nodes -x509 -newkey rsa:4096 -keyout key-nopass.pem -out cert.pem -days 365 <<EOF
     ${C}
@@ -34,13 +36,13 @@ Create self signed certificate
 
 Make scripts executable
 
-    chmod u+x on admin, eopeers
+    chmod u+x admin eopeers
 
 Use eopeers to install authority packages
 
     ./eopeers --install ..
 
-In an election directory edit config.json. example value
+In an election directory (admin/elections/your_election) edit config.json. example value
 
     {
       "election-id": "1",
