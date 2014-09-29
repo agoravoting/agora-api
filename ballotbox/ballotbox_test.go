@@ -88,17 +88,47 @@ func BenchmarkApi(b *testing.B) {
 
     secret := s["SharedSecret"].(string)
 	b.ResetTimer()
-    for i := 0; i < b.N; i++ {
-        now := time.Now()
-        voterId := now.Nanosecond()
-        header := fmt.Sprintf("voter-1-%d", voterId)
-        url := fmt.Sprintf("http://localhost:%d/api/v1/ballotbox/1/%d", port, voterId)
-        voteAuth := map[string]string{"Authorization": middleware.AuthHeader(header, secret)}
-        resp := request("POST", url, voteAuth, newVote, b)
-        if resp != nil && resp.StatusCode != http.StatusAccepted {
-     		b.Errorf("bad status code %d", resp.StatusCode)
-        }
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			now := time.Now()
+	    	voterId := now.Nanosecond()
+	    	header := fmt.Sprintf("voter-1-%d", voterId)
+	    	url := fmt.Sprintf("http://localhost:%d/api/v1/ballotbox/1/%d", port, voterId)
+	    	voteAuth := map[string]string{"Authorization": middleware.AuthHeader(header, secret)}
+	    	resp := request("POST", url, voteAuth, newVote, b)
+	    	if resp != nil && resp.StatusCode != http.StatusAccepted {
+	 			b.Errorf("bad status code %d", resp.StatusCode)
+	    	}
+	    }
+	})
+
+    /* c := make(chan string)
+    start := time.Now()
+
+    for j:= 0; j < 10; j++ {
+    	go func(){
+    		for i := 0; i < 1000; i++ {
+	    		now := time.Now()
+	        	voterId := now.Nanosecond()
+	        	header := fmt.Sprintf("voter-1-%d", voterId)
+	        	url := fmt.Sprintf("http://localhost:%d/api/v1/ballotbox/1/%d", port, voterId)
+	        	voteAuth := map[string]string{"Authorization": middleware.AuthHeader(header, secret)}
+	        	resp := request("POST", url, voteAuth, newVote, b)
+	        	if resp != nil && resp.StatusCode != http.StatusAccepted {
+	     			b.Errorf("bad status code %d", resp.StatusCode)
+	        	}
+	        }
+        	c <- "ok"
+		}()
     }
+
+    for j:= 0; j < 10; j++ {
+    	<- c
+    }
+    delta := time.Now().Sub(start)
+    fmt.Printf("elapsed %f", float64(delta) / 1000000000)*/
+
     return
 }
 

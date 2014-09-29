@@ -7,6 +7,13 @@ import (
 	"flag"
 	"os"
 	"os/signal"
+
+	// "runtime"
+
+	// for profiling
+	/* _ "net/http/pprof"
+	"net/http"
+	"log"*/
 )
 
 var quit = make(chan bool)
@@ -27,6 +34,12 @@ func main() {
 		err error
 	)
 
+	// profiling
+	/* go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}() */
+
+	// runtime.GOMAXPROCS(4)
 	var addr = flag.String("addr", ":3000", "http service address")
 	var conf = flag.String("config", "config.json", "path to the config file")
 	flag.Parse()
@@ -35,5 +48,6 @@ func main() {
 	}
 
 	go s.Server.Http.Run(*addr)
+
 	<-quit
 }
