@@ -1,14 +1,20 @@
-==== agora-api
+agora-api admin
+===============
 
-Set up admin
+Python dependencies
 
-* pip install SQLAlchemy, psycopg2, PrettyTable, argsparse, requests
+    pip install SQLAlchemy, psycopg2, PrettyTable, argsparse, requests
 
-* eopeers: set public ip, private ip, hostname, port at top of file
+eopeers: set public ip, private ip, hostname, port at top of file
 
-* mkdir /srv/certs, mkdir /srv/certs/selfsigned/,
+    PUBLIC_IP_ADDRESS = "1.1.1.1"
+    PRIVATE_IP_ADDRESS = "1.1.1.1"
+    HOSTNAME = "foo.bar"
+    PORT = 8000
 
-* create self signed certificate:
+Create self signed certificate
+
+    mkdir /srv/certs, mkdir /srv/certs/selfsigned/,
 
     openssl req -nodes -x509 -newkey rsa:4096 -keyout key-nopass.pem -out cert.pem -days 365 <<EOF
     ${C}
@@ -22,9 +28,15 @@ Set up admin
 
   cp cert.pem calist
 
-* use eopeers to install authority packages
+Make scripts executable
 
-* for an election directory, edit config.json. example value:
+    chmod u+x on admin, eopeers
+
+Use eopeers to install authority packages
+
+    eopeers --install ..
+
+In an election directory edit config.json. example value
 
     {
       "election-id": "1",
@@ -52,17 +64,15 @@ Set up admin
       "extra": []
     }
 
-    The id field is optional, it defaults to the election directory name
+The id field is optional, it defaults to the election directory name
 
-* nginx, if localPort is set to 8000 in admin script
+Forward port in nginx, for example
 
     server {
-        listen         94.23.34.20:8000;
-        server_name    vota.podemos.info;
+        listen         1.1.1.1:8000;
+        server_name    foo.bar;
 
         location / {
             proxy_pass http://localhost:8000;
         }
     }
-
-* chmod u+x on admin, eopeers
