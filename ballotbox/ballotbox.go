@@ -2,12 +2,15 @@ package ballotbox
 
 import (
 	"github.com/agoravoting/agora-http-go/middleware"
+	"github.com/agoravoting/agora-http-go/util"
 	s "github.com/agoravoting/agora-http-go/server"
 	"github.com/codegangsta/negroni"
 	"github.com/jmoiron/sqlx"
 	"github.com/julienschmidt/httprouter"
 	"encoding/json"
 	"net/http"
+	"io/ioutil"
+	"path"
 )
 
 const (
@@ -22,18 +25,23 @@ type BallotBox struct {
 	getStmt    *sqlx.Stmt
 }
 
+var configs = make(map[string]string)
+
 func (bb *BallotBox) Name() string {
 	return bb.name
 }
 
-func (bb *BallotBox) Init() (err error) {
+func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 	// setup the routes
 	bb.router = httprouter.New()
 	bb.router.POST("/:election_id/:voter_id", middleware.Join(
-		s.Server.ErrorWrap.Do(bb.post),
+		s.Server.ErrorWrap.Do(bb.postVote),
 		s.Server.CheckPerms("voter-${election_id}-${voter_id}", SESSION_EXPIRE)))
-	bb.router.GET("/:election_id/:voter_id/:vote_hash", middleware.Join(
-		s.Server.ErrorWrap.Do(bb.get),
+	bb.router.GET("/check_hash/:election_id/:voter_id/:vote_hash", middleware.Join(
+		s.Server.ErrorWrap.Do(bb.checkHash),
+		s.Server.CheckPerms("voter-${election_id}-${voter_id}", SESSION_EXPIRE)))
+	bb.router.GET("/get_election_config/:election_id/:voter_id", middleware.Join(
+		s.Server.ErrorWrap.Do(bb.getElectionConfig),
 		s.Server.CheckPerms("voter-${election_id}-${voter_id}", SESSION_EXPIRE)))
 
 	// setup prepared sql queries
@@ -44,6 +52,45 @@ func (bb *BallotBox) Init() (err error) {
 		return
 	}
 
+	// initialize election cfgs to return in getConfig
+	var electionDir string
+	json.Unmarshal(*cfg["electionDir"], &electionDir)
+	s.Server.Logger.Printf("Loading cfgs from %s", electionDir)
+
+	files, err := ioutil.ReadDir(electionDir)
+	if(err != nil) {
+		return
+	}
+
+    for _, f := range files {
+    	if(f.IsDir()) {
+    		// read config.json
+    		cfgPath := path.Join(electionDir, f.Name(), "config.json")
+    		var cfgText string
+    		cfgText, err = util.Contents(cfgPath)
+    		if(err != nil) {
+    			s.Server.Logger.Printf("Could not read config.json at %s %v, skipping", cfgPath, err)
+    			continue
+    		}
+    		var cfg map[string]*json.RawMessage
+    		err = json.Unmarshal([]byte(cfgText), &cfg)
+			if err != nil {
+				s.Server.Logger.Printf("Error reading config file %s %v, skipping", cfgPath, err)
+				continue
+			}
+    		var electionId string
+    		value, ok := cfg["election-id"]
+    		if !ok {
+    			electionId = f.Name()
+    		} else {
+				json.Unmarshal(*value, &electionId)
+    		}
+
+			s.Server.Logger.Printf("Loaded config file for election %s", electionId)
+			configs[electionId] = cfgText
+    	}
+    }
+
 	// add the routes to the server
 	handler := negroni.New(negroni.Wrap(bb.router))
 	s.Server.Mux.OnMux("api/v1/ballotbox", handler)
@@ -51,7 +98,7 @@ func (bb *BallotBox) Init() (err error) {
 }
 
 // returns the vote corresponding to the given hash
-func (bb *BallotBox) get(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
+func (bb *BallotBox) checkHash(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
 	var (
 		v   []Vote
 		err error
@@ -91,8 +138,31 @@ func (bb *BallotBox) get(w http.ResponseWriter, r *http.Request, p httprouter.Pa
 	return nil
 }
 
+func (bb *BallotBox) getElectionConfig(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
+	var err error
+
+	electionId := p.ByName("election_id")
+	voterId := p.ByName("voter_id")
+	if electionId == "" {
+		return &middleware.HandledError{Err: err, Code: 400, Message: "No election_id", CodedMessage: "error-insert"}
+	}
+	if voterId == "" {
+		return &middleware.HandledError{Err: err, Code: 400, Message: "No voter_id", CodedMessage: "error-insert"}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	config, ok := configs[electionId]
+	if !ok {
+		return &middleware.HandledError{Err: err, Code: 404, Message: "Not found", CodedMessage: "not-found"}
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(config))
+	return nil
+}
+
 // add a new vote
-func (bb *BallotBox) post(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
+func (bb *BallotBox) postVote(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
 	var (
 		tx    = s.Server.Db.MustBegin()
 		vote  Vote

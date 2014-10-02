@@ -38,7 +38,8 @@ var (
 	"ActiveModules": [
 		"github.com/agoravoting/agora-api/ballotbox"
 	],
-	"RavenDSN": ""
+	"RavenDSN": "",
+    "electionDir": "../admin/elections"
 }`
 )
 
@@ -52,8 +53,12 @@ func TestAgoraApi(t *testing.T) {
 	posted = ts.RequestJson("POST", "/api/v1/ballotbox/1/1", http.StatusAccepted, voteAuth, newVote)
 	fmt.Printf("new vote %v\n", posted)
 
-	foundVote := ts.Request("GET", "/api/v1/ballotbox/1/1/hash", http.StatusOK, voteAuth, "")
+	foundVote := ts.Request("GET", "/api/v1/ballotbox/check_hash/1/1/hash", http.StatusOK, voteAuth, "")
 	fmt.Printf("found vote %v\n", foundVote)
+
+    // will only work if there is an election (config.json) with election-id 1 in admin/elections
+    // cfg := ts.RequestJson("GET", "/api/v1/ballotbox/get_election_config/1/1", http.StatusOK, voteAuth, newVote)
+    // fmt.Printf("cfg %v\n", cfg)
 }
 
 func request(method string, path string, headers map[string]string, requesTBody string, b *testing.B) *http.Response {
