@@ -398,9 +398,9 @@ def create(cfg):
 
     return pkFile
 
-def tally(cfg, start_server = True):
+def tally(cfg, do_start_server = True):
     config = cfg['electionCfg']
-    if(start_server):
+    if do_start_server:
         start_server(config['local-port'])
 
     electionId = config['election-id']
