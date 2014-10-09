@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"io/ioutil"
 	"path"
+	"os"
 )
 
 const (
@@ -25,7 +26,9 @@ type BallotBox struct {
 	getStmt    *sqlx.Stmt
 }
 
+// TODO: move inside BallotBox
 var configs = make(map[string]string)
+var pubkeys = make(map[string]string)
 
 func (bb *BallotBox) Name() string {
 	return bb.name
@@ -43,6 +46,8 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 	bb.router.GET("/election/:election_id/config/:voter_id", middleware.Join(
 		s.Server.ErrorWrap.Do(bb.getElectionConfig),
 		s.Server.CheckPerms("voter-${election_id}-${voter_id}", SESSION_EXPIRE)))
+	bb.router.GET("/election/:election_id/pubkeys", middleware.Join(
+		s.Server.ErrorWrap.Do(bb.getElectionPubKeys)))
 
 	// setup prepared sql queries
 	if bb.insertStmt, err = s.Server.Db.Preparex("SELECT set_vote($1, $2, $3, $4, $5)"); err != nil {
@@ -90,6 +95,28 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 
 			s.Server.Logger.Printf("Loaded config file for election %s", electionId)
 			configs[electionId] = cfgText
+
+			// read pk_<election-id>
+			pkPath := path.Join(electionDir, f.Name(), "pk_" + electionId)
+			var pkText string
+			if _, err := os.Stat(pkPath); os.IsNotExist(err) {
+				s.Server.Logger.Printf("No pubkey at %s", pkPath)
+				continue
+			}
+			pkText, err = util.Contents(pkPath)
+			if(err != nil) {
+				s.Server.Logger.Printf("Could not read pubkey at %s %v, skipping", pkPath, err)
+				continue
+			} else {
+				s.Server.Logger.Printf("Reading %s", pkPath)
+			}
+			var pk []interface{}
+			err = json.Unmarshal([]byte(pkText), &pk)
+			if err != nil {
+				s.Server.Logger.Printf("Error reading pubkey file %s %v, skipping", pkPath, err)
+				continue
+			}
+			pubkeys[electionId] = pkText
 		}
 	}
 
@@ -161,6 +188,26 @@ func (bb *BallotBox) getElectionConfig(w http.ResponseWriter, r *http.Request, p
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(config))
+	return nil
+}
+
+func (bb *BallotBox) getElectionPubKeys(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
+	var err error
+	s.Server.Logger.Printf("getElectionConfig")
+
+	electionId := p.ByName("election_id")
+	if electionId == "" {
+		return &middleware.HandledError{Err: err, Code: 400, Message: "No election_id", CodedMessage: "empty-election-id"}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	pubkeys, ok := pubkeys[electionId]
+	if !ok {
+		return &middleware.HandledError{Err: err, Code: 404, Message: "Not found", CodedMessage: "not-found"}
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(pubkeys))
 	return nil
 }
 
