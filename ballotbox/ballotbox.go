@@ -34,13 +34,13 @@ func (bb *BallotBox) Name() string {
 func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 	// setup the routes
 	bb.router = httprouter.New()
-	bb.router.POST("/:election_id/:voter_id", middleware.Join(
+	bb.router.POST("/election/:election_id/vote/:voter_id", middleware.Join(
 		s.Server.ErrorWrap.Do(bb.postVote),
 		s.Server.CheckPerms("voter-${election_id}-${voter_id}", SESSION_EXPIRE)))
-	bb.router.GET("/check_hash/:election_id/:voter_id/:vote_hash", middleware.Join(
+	bb.router.GET("/election/:election_id/check-hash/:voter_id/:vote_hash", middleware.Join(
 		s.Server.ErrorWrap.Do(bb.checkHash),
 		s.Server.CheckPerms("voter-${election_id}-${voter_id}", SESSION_EXPIRE)))
-	bb.router.GET("/get_election_config/:election_id/:voter_id", middleware.Join(
+	bb.router.GET("/election/:election_id/config/:voter_id", middleware.Join(
 		s.Server.ErrorWrap.Do(bb.getElectionConfig),
 		s.Server.CheckPerms("voter-${election_id}-${voter_id}", SESSION_EXPIRE)))
 
@@ -62,34 +62,36 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 		return
 	}
 
-    for _, f := range files {
-    	if(f.IsDir()) {
-    		// read config.json
-    		cfgPath := path.Join(electionDir, f.Name(), "config.json")
-    		var cfgText string
-    		cfgText, err = util.Contents(cfgPath)
-    		if(err != nil) {
-    			s.Server.Logger.Printf("Could not read config.json at %s %v, skipping", cfgPath, err)
-    			continue
-    		}
-    		var cfg map[string]*json.RawMessage
-    		err = json.Unmarshal([]byte(cfgText), &cfg)
+	for _, f := range files {
+		if(f.IsDir()) {
+			// read config.json
+			cfgPath := path.Join(electionDir, f.Name(), "config.json")
+			var cfgText string
+			cfgText, err = util.Contents(cfgPath)
+			if(err != nil) {
+				s.Server.Logger.Printf("Could not read config.json at %s %v, skipping", cfgPath, err)
+				continue
+			} else {
+				s.Server.Logger.Printf("Reading %s", cfgPath)
+			}
+			var cfg map[string]*json.RawMessage
+			err = json.Unmarshal([]byte(cfgText), &cfg)
 			if err != nil {
 				s.Server.Logger.Printf("Error reading config file %s %v, skipping", cfgPath, err)
 				continue
 			}
-    		var electionId string
-    		value, ok := cfg["election-id"]
-    		if !ok {
-    			electionId = f.Name()
-    		} else {
+			var electionId string
+			value, ok := cfg["election-id"]
+			if !ok {
+				electionId = f.Name()
+			} else {
 				json.Unmarshal(*value, &electionId)
-    		}
+			}
 
 			s.Server.Logger.Printf("Loaded config file for election %s", electionId)
 			configs[electionId] = cfgText
-    	}
-    }
+		}
+	}
 
 	// add the routes to the server
 	handler := negroni.New(negroni.Wrap(bb.router))
@@ -109,10 +111,10 @@ func (bb *BallotBox) checkHash(w http.ResponseWriter, r *http.Request, p httprou
 	voterId := p.ByName("voter_id")
 	voteHash = p.ByName("vote_hash")
 	if electionId == "" {
-		return &middleware.HandledError{Err: err, Code: 400, Message: "No election_id", CodedMessage: "error-insert"}
+		return &middleware.HandledError{Err: err, Code: 400, Message: "No election_id", CodedMessage: "empty-election-id"}
 	}
 	if voterId == "" {
-		return &middleware.HandledError{Err: err, Code: 400, Message: "No voter_id", CodedMessage: "error-insert"}
+		return &middleware.HandledError{Err: err, Code: 400, Message: "No voter_id", CodedMessage: "empty-voter-id"}
 	}
 	if voteHash == "" {
 		return &middleware.HandledError{Err: err, Code: 400, Message: "Invalid hash format", CodedMessage: "invalid-format"}
@@ -140,14 +142,15 @@ func (bb *BallotBox) checkHash(w http.ResponseWriter, r *http.Request, p httprou
 
 func (bb *BallotBox) getElectionConfig(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
 	var err error
+	s.Server.Logger.Printf("getElectionConfig")
 
 	electionId := p.ByName("election_id")
 	voterId := p.ByName("voter_id")
 	if electionId == "" {
-		return &middleware.HandledError{Err: err, Code: 400, Message: "No election_id", CodedMessage: "error-insert"}
+		return &middleware.HandledError{Err: err, Code: 400, Message: "No election_id", CodedMessage: "empty-election-id"}
 	}
 	if voterId == "" {
-		return &middleware.HandledError{Err: err, Code: 400, Message: "No voter_id", CodedMessage: "error-insert"}
+		return &middleware.HandledError{Err: err, Code: 400, Message: "No voter_id", CodedMessage: "empty-voter-id"}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -182,10 +185,10 @@ func (bb *BallotBox) postVote(w http.ResponseWriter, r *http.Request, p httprout
 	ip := r.RemoteAddr
 
 	if electionId == "" {
-		return &middleware.HandledError{Err: err, Code: 400, Message: "No election_id", CodedMessage: "error-insert"}
+		return &middleware.HandledError{Err: err, Code: 400, Message: "No election_id", CodedMessage: "empty-election-id"}
 	}
 	if voterId == "" {
-		return &middleware.HandledError{Err: err, Code: 400, Message: "No voter_id", CodedMessage: "error-insert"}
+		return &middleware.HandledError{Err: err, Code: 400, Message: "No voter_id", CodedMessage: "empty-voter-id"}
 	}
 	vote_json["election_id"] = electionId
 	vote_json["voter_id"] = voterId

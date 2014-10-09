@@ -24,9 +24,12 @@ After that, set up the database:
 
     go install bitbucket.org/liamstask/goose/cmd/goose
 
+You have to configure the db password both in config.json and in db/dbconf.yml.
+Then, you can migrate database:
+
     goose up
 
-And now you are good to go:
+And now you are good to go and run the backend:
 
     go run main.go
 

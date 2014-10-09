@@ -48,12 +48,12 @@ func TestAgoraApi(t *testing.T) {
 	defer ts.TearDown()
 	voteAuth := map[string]string{"Authorization": middleware.AuthHeader("voter-1-1", SharedSecret)}
 
-	posted := ts.RequestJson("POST", "/api/v1/ballotbox/1/1", http.StatusAccepted, voteAuth, newVote)
+	posted := ts.RequestJson("POST", "/api/v1/ballotbox/election/1/vote/1", http.StatusAccepted, voteAuth, newVote)
 	fmt.Printf("new vote %v\n", posted)
-	posted = ts.RequestJson("POST", "/api/v1/ballotbox/1/1", http.StatusAccepted, voteAuth, newVote)
+	posted = ts.RequestJson("POST", "/api/v1/ballotbox/election/1/vote/1", http.StatusAccepted, voteAuth, newVote)
 	fmt.Printf("new vote %v\n", posted)
 
-	foundVote := ts.Request("GET", "/api/v1/ballotbox/check_hash/1/1/hash", http.StatusOK, voteAuth, "")
+	foundVote := ts.Request("GET", "/api/v1/ballotbox/election/1/check-hash/1/hash", http.StatusOK, voteAuth, "")
 	fmt.Printf("found vote %v\n", foundVote)
 
     // will only work if there is an election (config.json) with election-id 1 in admin/elections
@@ -100,7 +100,7 @@ func BenchmarkApi(b *testing.B) {
 			now := time.Now()
 	    	voterId := now.Nanosecond()
 	    	header := fmt.Sprintf("voter-1-%d", voterId)
-	    	url := fmt.Sprintf("http://%s:%d/api/v1/ballotbox/1/%d", *host, port, voterId)
+	    	url := fmt.Sprintf("http://%s:%d/api/v1/ballotbox/election/1/vote/%d", *host, port, voterId)
 	    	voteAuth := map[string]string{"Authorization": middleware.AuthHeader(header, secret)}
 	    	resp := request("POST", url, voteAuth, newVote, b)
 	    	if resp != nil && resp.StatusCode != http.StatusAccepted {
