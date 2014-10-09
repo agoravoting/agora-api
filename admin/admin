@@ -321,7 +321,7 @@ def wait_for_publicKey():
     if(cv.done):
         diff = time.time() - start
         try:
-            pk = cv.data['session_data'][0]['pubkey']
+            pk = [p['pubkey'] for p in cv.data['session_data']]
             print("> Election created (" + str(diff) + " sec), public key is")
             print(pk)
         except:
@@ -633,4 +633,4 @@ eotest <election_dir>: runs a full eo test cycle''')
         parser.print_help()
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+	main(sys.argv[1:])
