@@ -7,13 +7,6 @@ import (
 	"flag"
 	"os"
 	"os/signal"
-
-	// "runtime"
-
-	// for profiling
-	/* _ "net/http/pprof"
-	"net/http"
-	"log"*/
 )
 
 var quit = make(chan bool)

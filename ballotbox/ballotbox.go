@@ -14,10 +14,6 @@ import (
 	"os"
 )
 
-const (
-	SESSION_EXPIRE = 3600
-)
-
 type BallotBox struct {
 	router *httprouter.Router
 	name   string
@@ -35,17 +31,20 @@ func (bb *BallotBox) Name() string {
 }
 
 func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
+	var ballotboxSessionExpire int
+	json.Unmarshal(*cfg["ballotboxSessionExpire"], &ballotboxSessionExpire)
+
 	// setup the routes
 	bb.router = httprouter.New()
 	bb.router.POST("/election/:election_id/vote/:voter_id", middleware.Join(
 		s.Server.ErrorWrap.Do(bb.postVote),
-		s.Server.CheckPerms("voter-${election_id}-${voter_id}", SESSION_EXPIRE)))
+		s.Server.CheckPerms("voter-${election_id}-${voter_id}", ballotboxSessionExpire)))
 	bb.router.GET("/election/:election_id/check-hash/:voter_id/:vote_hash", middleware.Join(
 		s.Server.ErrorWrap.Do(bb.checkHash),
-		s.Server.CheckPerms("voter-${election_id}-${voter_id}", SESSION_EXPIRE)))
+		s.Server.CheckPerms("voter-${election_id}-${voter_id}", ballotboxSessionExpire)))
 	bb.router.GET("/election/:election_id/config/:voter_id", middleware.Join(
 		s.Server.ErrorWrap.Do(bb.getElectionConfig),
-		s.Server.CheckPerms("voter-${election_id}-${voter_id}", SESSION_EXPIRE)))
+		s.Server.CheckPerms("voter-${election_id}-${voter_id}", ballotboxSessionExpire)))
 	bb.router.GET("/election/:election_id/pubkeys", middleware.Join(
 		s.Server.ErrorWrap.Do(bb.getElectionPubKeys)))
 
@@ -261,7 +260,7 @@ func (bb *BallotBox) postVote(w http.ResponseWriter, r *http.Request, p httprout
 
 // parses a vote from a request.
 func parseVote(r *http.Request) (v Vote, err error) {
-	// 	rb, err := httputil.DumpRequest(r, true)
+	// rb, err := httputil.DumpRequest(r, true)
 	if err != nil {
 		return
 	}
