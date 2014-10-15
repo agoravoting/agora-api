@@ -72,6 +72,7 @@ def votes_table():
         Column('voter_id', String),
         Column('created', TIMESTAMP),
         Column('modified', TIMESTAMP),
+        Column('write_count', Integer)
     )
     return votes
 
@@ -80,7 +81,7 @@ def show_votes(result):
         data = str(data)
         return (data[:25] + '..') if len(data) > 20 else data
 
-    v = PrettyTable(['id', 'vote', 'vote_hash', 'election_id', 'voter_id', 'created', 'modified'])
+    v = PrettyTable(['id', 'vote', 'vote_hash', 'election_id', 'voter_id', 'created', 'modified', 'writes'])
     v.padding_width = 1
     for row in result:
         v.add_row(map(truncate, row))

@@ -14,6 +14,7 @@ import (
 	"flag"
 	"strconv"
 	"os"
+    "crypto/tls"
 )
 
 const (
@@ -27,13 +28,13 @@ var (
 	port int
     host *string
 	// sharedsecret duplicated here, once used in below test, the other in config passed to server, must match.
-	SharedSecret = "somesecret"
+	SharedSecret = "vor1HieM"
 	Config       = `{
 	"Debug": true,
 	"DbMaxIddleConnections": 5,
 	"DbConnectString": "user=ballotbox password=ballotbox dbname=ballotbox_test sslmode=disable",
 
-	"SharedSecret": "somesecret",
+	"SharedSecret": "vor1HieM",
 	"Admins": ["test@example.com"],
 	"ActiveModules": [
 		"github.com/agoravoting/agora-api/ballotbox"
@@ -62,7 +63,12 @@ func TestAgoraApi(t *testing.T) {
 }
 
 func request(method string, path string, headers map[string]string, requesTBody string, b *testing.B) *http.Response {
-    client := &http.Client{}
+    // skip certificate validation
+    tr := &http.Transport{
+        TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+    }
+
+    client := &http.Client{Transport: tr}
     r, err := http.NewRequest(method, path, bytes.NewBufferString(requesTBody))
 	if err != nil {
 		b.Errorf("error creating request %v", err)
@@ -79,6 +85,7 @@ func request(method string, path string, headers map[string]string, requesTBody 
     return resp
 }
 
+// reads config from config.json
 func BenchmarkApi(b *testing.B) {
     confStr, err := util.Contents("../config.json")
     if err != nil {
@@ -93,43 +100,59 @@ func BenchmarkApi(b *testing.B) {
     }
 
     secret := s["SharedSecret"].(string)
+
 	b.ResetTimer()
+    b.SetParallelism(10)
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			now := time.Now()
+    		now := time.Now()
 	    	voterId := now.Nanosecond()
-	    	header := fmt.Sprintf("voter-1-%d", voterId)
-	    	url := fmt.Sprintf("http://%s:%d/api/v1/ballotbox/election/1/vote/%d", *host, port, voterId)
-	    	voteAuth := map[string]string{"Authorization": middleware.AuthHeader(header, secret)}
-	    	resp := request("POST", url, voteAuth, newVote, b)
-	    	if resp != nil && resp.StatusCode != http.StatusAccepted {
+            // header := fmt.Sprintf("voter-1-%d", voterId)
+	    	// url := fmt.Sprintf("http://%s:%d/api/v1/ballotbox/election/1/config/%d", *host, port, voterId)
+            header := fmt.Sprintf("voter-1306-%d", voterId)
+            url := fmt.Sprintf("https://%s:%d/api/v1/ballotbox/election/1306/config/%d", *host, port, voterId)
+
+
+            voteAuth := map[string]string{"Authorization": middleware.AuthHeader(header, secret)}
+	    	// resp := request("POST", url, voteAuth, newVote, b)
+            fmt.Printf("=>")
+            resp := request("GET", url, voteAuth, "", b)
+            fmt.Printf("|")
+	    	// if resp != nil && resp.StatusCode != http.StatusAccepted {
+            if resp != nil && resp.StatusCode != http.StatusOK {
 	 			b.Errorf("bad status code %d", resp.StatusCode)
 	    	}
 	    }
 	})
 
-    /* c := make(chan string)
+    /*c := make(chan string)
     start := time.Now()
 
-    for j:= 0; j < 10; j++ {
+    routines := 30
+
+    for j:= 0; j < routines; j++ {
     	go func(){
-    		for i := 0; i < 1000; i++ {
+    		for i := 0; i < 10; i++ {
 	    		now := time.Now()
 	        	voterId := now.Nanosecond()
-	        	header := fmt.Sprintf("voter-1-%d", voterId)
-	        	url := fmt.Sprintf("http://%s:%d/api/v1/ballotbox/1/%d", host, port, voterId)
-	        	voteAuth := map[string]string{"Authorization": middleware.AuthHeader(header, secret)}
-	        	resp := request("POST", url, voteAuth, newVote, b)
-	        	if resp != nil && resp.StatusCode != http.StatusAccepted {
-	     			b.Errorf("bad status code %d", resp.StatusCode)
-	        	}
+	        	header := fmt.Sprintf("voter-1306-%d", voterId)
+                url := fmt.Sprintf("https://%s:%d/api/v1/ballotbox/election/1306/config/%d", *host, port, voterId)
+                voteAuth := map[string]string{"Authorization": middleware.AuthHeader(header, secret)}
+                // resp := request("POST", url, voteAuth, newVote, b)
+                fmt.Printf("=>")
+                resp := request("GET", url, voteAuth, "", b)
+                fmt.Printf("|")
+                // if resp != nil && resp.StatusCode != http.StatusAccepted {
+                if resp != nil && resp.StatusCode != http.StatusOK {
+                    b.Errorf("bad status code %d", resp.StatusCode)
+                }
 	        }
         	c <- "ok"
 		}()
     }
 
-    for j:= 0; j < 10; j++ {
+    for j:= 0; j < routines; j++ {
     	<- c
     }
     delta := time.Now().Sub(start)
