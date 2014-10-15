@@ -50,7 +50,14 @@ def get_backend_config():
         config = json.loads(f.read())
 
     dbConnection = config['DbConnectString']
-    dbParams = dict(re.findall(r'(\S+)=(".*?"|\S+)', dbConnection))
+    def get_pair(l):
+      if len(l[2]) > 0:
+        return (l[0], l[2])
+      elif len(l[1]) > 0:
+        return (l[0], l[1])
+      else:
+        return (l[0], l[3])
+    dbParams = dict([get_pair(l) for l in re.findall(r'(\S+)=(\'(.*)\'|"(.*)"|(\S+))', dbConnection)])
     config['db'] = dbParams
 
     return config
