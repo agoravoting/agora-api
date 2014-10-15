@@ -228,7 +228,11 @@ func (bb *BallotBox) postVote(w http.ResponseWriter, r *http.Request, p httprout
 
 	electionId := p.ByName("election_id")
 	voterId := p.ByName("voter_id")
-	ip := r.RemoteAddr
+	// ip := r.RemoteAddr
+	ip := r.Header.Get("X-Forwarded-For")
+	if len(ip) == 0 {
+		ip = r.RemoteAddr
+	}
 
 	if electionId == "" {
 		return &middleware.HandledError{Err: err, Code: 400, Message: "No election_id", CodedMessage: "empty-election-id"}
