@@ -1,0 +1,15 @@
+{
+	"Debug": true,
+	"DbMaxIddleConnections": 5,
+	"DbConnectString": "user=ballotbox password=ballotbox dbname=ballotbox sslmode=disable",
+	"maxWrites": 10,
+
+	"SharedSecret": "somesecret",
+	"Admins": ["edulix@agoravoting.com", "danigm@agoravoting.com"],
+	"ActiveModules": [
+		"github.com/agoravoting/agora-api/ballotbox"
+	],
+	"RavenDSN": "",
+	"electionDir": "admin/elections",
+	"ballotboxSessionExpire": 36000
+}

@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"path"
 	"os"
+	"fmt"
 )
 
 type BallotBox struct {
@@ -20,6 +21,7 @@ type BallotBox struct {
 
 	insertStmt *sqlx.Stmt
 	getStmt    *sqlx.Stmt
+	maxWrites  int
 }
 
 // TODO: move inside BallotBox
@@ -33,6 +35,9 @@ func (bb *BallotBox) Name() string {
 func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 	var ballotboxSessionExpire int
 	json.Unmarshal(*cfg["ballotboxSessionExpire"], &ballotboxSessionExpire)
+	var maxWrites int
+	json.Unmarshal(*cfg["maxWrites"], &maxWrites)
+	bb.maxWrites = maxWrites
 
 	// setup the routes
 	bb.router = httprouter.New()
@@ -49,7 +54,7 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 		s.Server.ErrorWrap.Do(bb.getElectionPubKeys)))
 
 	// setup prepared sql queries
-	if bb.insertStmt, err = s.Server.Db.Preparex("SELECT set_vote($1, $2, $3, $4, $5)"); err != nil {
+	if bb.insertStmt, err = s.Server.Db.Preparex("SELECT set_vote($1, $2, $3, $4, $5, $6)"); err != nil {
 		return
 	}
 	if bb.getStmt, err = s.Server.Db.Preparex("SELECT id, vote, vote_hash, election_id, voter_id FROM votes WHERE election_id = $1 and voter_id = $2 and vote_hash = $3"); err != nil {
@@ -244,7 +249,7 @@ func (bb *BallotBox) postVote(w http.ResponseWriter, r *http.Request, p httprout
 	vote_json["voter_id"] = voterId
 
 	var foo string
-	if err = bb.insertStmt.Get(&foo, vote_json["vote"], vote_json["vote_hash"], vote_json["election_id"], vote_json["voter_id"], ip); err != nil {
+	if err = bb.insertStmt.Get(&foo, vote_json["vote"], vote_json["vote_hash"], vote_json["election_id"], vote_json["voter_id"], ip, bb.maxWrites); err != nil {
 		tx.Rollback()
 		return &middleware.HandledError{Err: err, Code: 500, Message: "Error calling set_vote", CodedMessage: "error-upsert"}
 	}
@@ -257,7 +262,9 @@ func (bb *BallotBox) postVote(w http.ResponseWriter, r *http.Request, p httprout
 
 	w.WriteHeader(http.StatusAccepted)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("{}"))
+	var json = fmt.Sprintf("{\"updated\": \"%s\"}", foo)
+	// w.Write([]byte(foo))
+	w.Write([]byte(json))
 
 	return nil
 }

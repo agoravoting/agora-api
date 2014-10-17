@@ -28,13 +28,14 @@ var (
 	port int
     host *string
 	// sharedsecret duplicated here, once used in below test, the other in config passed to server, must match.
-	SharedSecret = "vor1HieM"
+	SharedSecret = "somesecret"
 	Config       = `{
 	"Debug": true,
 	"DbMaxIddleConnections": 5,
 	"DbConnectString": "user=ballotbox password=ballotbox dbname=ballotbox_test sslmode=disable",
-
-	"SharedSecret": "vor1HieM",
+    "ballotboxSessionExpire": 1000000,
+	"maxWrites": 1,
+    "SharedSecret": "somesecret",
 	"Admins": ["test@example.com"],
 	"ActiveModules": [
 		"github.com/agoravoting/agora-api/ballotbox"
@@ -108,18 +109,20 @@ func BenchmarkApi(b *testing.B) {
 		for pb.Next() {
     		now := time.Now()
 	    	voterId := now.Nanosecond()
+            // posting
             // header := fmt.Sprintf("voter-1-%d", voterId)
-	    	// url := fmt.Sprintf("http://%s:%d/api/v1/ballotbox/election/1/config/%d", *host, port, voterId)
+	    	// url := fmt.Sprintf("http://%s:%d/api/v1/ballotbox/election/1/vote/%d", *host, port, voterId)
+
+            // get config
             header := fmt.Sprintf("voter-1306-%d", voterId)
             url := fmt.Sprintf("https://%s:%d/api/v1/ballotbox/election/1306/config/%d", *host, port, voterId)
 
-
             voteAuth := map[string]string{"Authorization": middleware.AuthHeader(header, secret)}
 	    	// resp := request("POST", url, voteAuth, newVote, b)
-            fmt.Printf("=>")
             resp := request("GET", url, voteAuth, "", b)
-            fmt.Printf("|")
-	    	// if resp != nil && resp.StatusCode != http.StatusAccepted {
+	    	// for post
+            // if resp != nil && resp.StatusCode != http.StatusAccepted {
+            // for get config
             if resp != nil && resp.StatusCode != http.StatusOK {
 	 			b.Errorf("bad status code %d", resp.StatusCode)
 	    	}
