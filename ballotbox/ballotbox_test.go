@@ -34,7 +34,7 @@ var (
 	"DbMaxIddleConnections": 5,
 	"DbConnectString": "user=ballotbox password=ballotbox dbname=ballotbox_test sslmode=disable",
     "ballotboxSessionExpire": 1000000,
-	"maxWrites": 1,
+	"maxWrites": 2,
     "SharedSecret": "somesecret",
 	"Admins": ["test@example.com"],
 	"ActiveModules": [

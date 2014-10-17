@@ -3,7 +3,6 @@
 	"DbMaxIddleConnections": 5,
 	"DbConnectString": "user=ballotbox password=ballotbox dbname=ballotbox sslmode=disable",
 	"maxWrites": 10,
-
 	"SharedSecret": "somesecret",
 	"Admins": ["edulix@agoravoting.com", "danigm@agoravoting.com"],
 	"ActiveModules": [
