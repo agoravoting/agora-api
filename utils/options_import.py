@@ -147,23 +147,23 @@ def read_csv_to_dicts(path):
     ret = {
       "id": 1,
       "hash": "",
-      "pretty_name":"Votación de borradores",
-      "description":"Vota los borradores para decidir la forma de organización interna de Podemos. Estas cinco resoluciones se convertirán en cinco consensos fundamentales de Podemos, cinco ejes de trabajo político colectivo, cinco hitos del proceso democratizador más grande que ha conocido este país y que estamos construyendo entre todos y todas. Porque juntos, Podemos!",
+      "pretty_name":"",
+      "description":"",
       "title":"",
       "layout": "drafts-election",
       "voting_start_date": "",
       "voting_end_date": "",
       "is_recurring": False,
-      "director": "wadobo-auth1",
-      "authorities": "openkratio-authority",
-      "url": "http://podemos.info",
+      "director": "",
+      "authorities": "",
+      "url": "",
       "extra": [],
       "min": 0,
       "max": 1,
     }
     basequestion = {
       "a":"ballot/question",
-      "question":"", # => DOCUMENTO
+      "question":"",
       "description": "",
       "layout":"drafts-election",
       "tally_type":"APPROVAL",
@@ -177,11 +177,11 @@ def read_csv_to_dicts(path):
       "id": 1,
       "media_url":"",
       "details_title":"",
-      "details":"", #=> firmantes
-      "value":"",   #=> titulo
+      "details":"",
+      "value":"",
       "category": "",
       "a":"ballot/answer",
-      "urls":[ #=> url
+      "urls":[
         {"title": "Ver", "url": ""}
       ]
     }
