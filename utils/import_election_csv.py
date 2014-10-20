@@ -75,7 +75,7 @@ def read_csv_to_dicts(path):
                 "layout": "drafts-election",
                 "max": 1,
                 "min": 0,
-                "num_winners": 1,
+                "num_seats": 1,
                 "question": "Documento político",
                 "randomize_answer_order": false,
                 "tally_type": "APPROVAL"
@@ -104,7 +104,7 @@ def read_csv_to_dicts(path):
                 "layout": "drafts-election",
                 "max": 1,
                 "min": 0,
-                "num_winners": 1,
+                "num_seats": 1,
                 "question": "Documento ético",
                 "randomize_answer_order": false,
                 "tally_type": "APPROVAL"
@@ -133,7 +133,7 @@ def read_csv_to_dicts(path):
                 "layout": "drafts-election",
                 "max": 1,
                 "min": 0,
-                "num_winners": 1,
+                "num_seats": 1,
                 "question": "Documento organizativo",
                 "randomize_answer_order": false,
                 "tally_type": "APPROVAL"
@@ -191,6 +191,7 @@ def read_csv_to_dicts(path):
       ]
     }
     questions = {}
+    sorted_keys = []
     n = -1
 
     with open(path, mode='r', encoding="utf-8", errors='strict') as f:
@@ -224,6 +225,7 @@ def read_csv_to_dicts(path):
                     item['isPack'] = divisible == "no"
 
                     if question not in questions:
+                        sorted_keys.append(question)
                         questions[question] = copy.deepcopy(basequestion)
                         questions[question]['question'] = question
 
@@ -231,7 +233,7 @@ def read_csv_to_dicts(path):
                     questions[question]['answers'].append(item)
 
 
-        ret['questions_data'] = list(questions.values())
+        ret['questions_data'] = list([questions[q] for q in sorted_keys])
 
     return ret
 
