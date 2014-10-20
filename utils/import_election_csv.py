@@ -149,21 +149,21 @@ def read_csv_to_dicts(path):
 
 
     ret = {
-      "id": 1,
+      "id": 10205,
       "hash": "",
       "pretty_name":"",
       "description":"",
-      "title":"",
+      "title":"votacion-de-borradores",
       "layout": "drafts-election",
-      "voting_start_date": "",
-      "voting_end_date": "",
+      "voting_start_date": "2013-12-06T18:17:14.457000",
+      "voting_end_date": "2013-12-09T18:17:14.457000",
       "is_recurring": False,
-      "director": "",
-      "authorities": "",
-      "url": "",
+      "director": "wadobo-auth1",
+      "authorities": "openkratio-authority",
+      "url": "http://podemos.info",
       "extra": [],
       "min": 0,
-      "max": 1,
+      "max": 3,
     }
     basequestion = {
       "a":"ballot/question",
@@ -192,17 +192,16 @@ def read_csv_to_dicts(path):
     }
     questions = {}
     n = -1
-    m = 0
 
     with open(path, mode='r', encoding="utf-8", errors='strict') as f:
         for line in f:
             n += 1
             if n == 0:
-                values = line.split(',')
+                values = line.split('\t')
                 ret['pretty_name'] = values[1].strip()
                 continue
             elif n == 1:
-                values = line.split(',')
+                values = line.split('\t')
                 ret['description'] = values[1].strip()
                 pass
             elif n == 2:
@@ -211,24 +210,24 @@ def read_csv_to_dicts(path):
             else:
                 # print(n, line)
                 line = line.rstrip()
-                values = re.split(''',(?=(?:[^'"]|'[^']*'|"[^"]*")*$)''', line)
+                values = line.split('\t')
                 item = copy.deepcopy(baseopt)
                 question = values[3].strip()
 
-                if len(values) == 5:
-                    m += 1
-                    item['id'] = m
+                if len(values) >= 4:
+                    item['sort_order'] = n
                     item['value'] = values[1].strip()
                     item['value'] = values[1].strip()
                     item['details'] = values[2].strip().replace('"', '')
                     item['urls'][0]['url'] = values[0].strip()
-                    divisible = values[4].strip().lower()
+                    divisible = (len(values) > 4 and values[4].strip().lower())
                     item['isPack'] = divisible == "no"
 
                     if question not in questions:
                         questions[question] = copy.deepcopy(basequestion)
                         questions[question]['question'] = question
 
+                    item['id'] = 1 + len(questions[question]['answers'])
                     questions[question]['answers'].append(item)
 
 
