@@ -177,6 +177,7 @@ def read_csv_to_dicts(path):
       "id": 1,
       "media_url":"",
       "details_title":"",
+      "isPack": False,
       "details":"",
       "value":"",
       "category": "",
@@ -210,12 +211,15 @@ def read_csv_to_dicts(path):
                 item = copy.deepcopy(baseopt)
                 question = values[3].strip()
 
-                if len(values) == 4:
+                if len(values) == 5:
                     m += 1
                     item['id'] = m
                     item['value'] = values[1].strip()
+                    item['value'] = values[1].strip()
                     item['details'] = values[2].strip().replace('"', '')
                     item['urls'][0]['url'] = values[0].strip()
+                    divisible = values[4].strip().lower()
+                    item['isPack'] = divisible == "no"
 
                     if question not in questions:
                         questions[question] = copy.deepcopy(basequestion)
