@@ -31,114 +31,118 @@ def read_csv_to_dicts(path):
     Título de votación:,Votación de borradores
     Descripción,Descripción de la votación lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
     URL,TÍTULO,FIRMANTES,DOCUMENTO
-    https://whatever.com,Propuesta de Pablo,"Firmante 1, Firmante 2..",Documento ético
-    https://whatever.com,Propuesta de Pablo,"Firmante 1, Firmante 2..",Documento político
-    https://whatever.com,Propuesta de Pablo,"Firmante 1, Firmante 2..",Documento organizativo
+    https://whatever.com,Propuesta de Pablo,"Firmante 1, Firmante 2..",Documento ético,no
+    https://whatever.com,Propuesta de Pablo,"Firmante 1, Firmante 2..",Documento político,no
+    https://whatever.com,Propuesta de Pablo,"Firmante 1, Firmante 2..",Documento organizativo,si
 
     This file would be converted into the following
 
     {
-        "pretty_name": "Votación de borradores",
-        "voting_start_date": "",
-        "min": 0,
-        "max": 1,
-        "is_recurring": false,
-        "director": "wadobo-auth1",
+        "authorities": "",
+        "description": "Descripción de la votación lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+    lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum",
+        "director": "",
+        "extra": [],
+        "hash": "",
         "id": 1,
-        "description": "Descripción de la votación lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum",
-        "url": "http://podemos.info",
+        "is_recurring": false,
+        "layout": "drafts-election",
+        "max": 1,
+        "min": 0,
+        "pretty_name": "Votación de borradores",
         "questions_data": [
             {
-                "question": "Documento organizativo",
-                "description": "",
-                "tally_type": "APPROVAL",
-                "min": 0,
                 "a": "ballot/question",
-                "max": 1,
-                "layout": "drafts-election",
-                "randomize_answer_order": false,
                 "answers": [
                     {
-                        "media_url": "",
-                        "details_title": "",
-                        "value": "Propuesta de Pablo",
-                        "category": "",
                         "a": "ballot/answer",
+                        "category": "",
                         "details": "Firmante 1, Firmante 2..",
+                        "details_title": "",
+                        "id": 2,
+                        "isPack": true,
+                        "media_url": "",
                         "urls": [
                             {
-                                "url": "https://whatever.com",
-                                "title": "Ver"
+                                "title": "Ver",
+                                "url": "https://whatever.com"
                             }
                         ],
-                        "id": 3
+                        "value": "Propuesta de Pablo"
                     }
                 ],
-                "num_winners": 1
-            },
-            {
+                "description": "",
+                "layout": "drafts-election",
+                "max": 1,
+                "min": 0,
+                "num_winners": 1,
                 "question": "Documento político",
-                "description": "",
-                "tally_type": "APPROVAL",
-                "min": 0,
-                "a": "ballot/question",
-                "max": 1,
-                "layout": "drafts-election",
                 "randomize_answer_order": false,
-                "answers": [
-                    {
-                        "media_url": "",
-                        "details_title": "",
-                        "value": "Propuesta de Pablo",
-                        "category": "",
-                        "a": "ballot/answer",
-                        "details": "Firmante 1, Firmante 2..",
-                        "urls": [
-                            {
-                                "url": "https://whatever.com",
-                                "title": "Ver"
-                            }
-                        ],
-                        "id": 2
-                    }
-                ],
-                "num_winners": 1
+                "tally_type": "APPROVAL"
             },
             {
-                "question": "Documento ético",
-                "description": "",
-                "tally_type": "APPROVAL",
-                "min": 0,
                 "a": "ballot/question",
-                "max": 1,
-                "layout": "drafts-election",
-                "randomize_answer_order": false,
                 "answers": [
                     {
-                        "media_url": "",
-                        "details_title": "",
-                        "value": "Propuesta de Pablo",
-                        "category": "",
                         "a": "ballot/answer",
+                        "category": "",
                         "details": "Firmante 1, Firmante 2..",
+                        "details_title": "",
+                        "id": 1,
+                        "isPack": true,
+                        "media_url": "",
                         "urls": [
                             {
-                                "url": "https://whatever.com",
-                                "title": "Ver"
+                                "title": "Ver",
+                                "url": "https://whatever.com"
                             }
                         ],
-                        "id": 1
+                        "value": "Propuesta de Pablo"
                     }
                 ],
-                "num_winners": 1
+                "description": "",
+                "layout": "drafts-election",
+                "max": 1,
+                "min": 0,
+                "num_winners": 1,
+                "question": "Documento ético",
+                "randomize_answer_order": false,
+                "tally_type": "APPROVAL"
+            },
+            {
+                "a": "ballot/question",
+                "answers": [
+                    {
+                        "a": "ballot/answer",
+                        "category": "",
+                        "details": "Firmante 1, Firmante 2..",
+                        "details_title": "",
+                        "id": 3,
+                        "isPack": false,
+                        "media_url": "",
+                        "urls": [
+                            {
+                                "title": "Ver",
+                                "url": "https://whatever.com"
+                            }
+                        ],
+                        "value": "Propuesta de Pablo"
+                    }
+                ],
+                "description": "",
+                "layout": "drafts-election",
+                "max": 1,
+                "min": 0,
+                "num_winners": 1,
+                "question": "Documento organizativo",
+                "randomize_answer_order": false,
+                "tally_type": "APPROVAL"
             }
         ],
-        "extra": [],
-        "authorities": "openkratio-authority",
-        "layout": "drafts-election",
+        "title": "",
+        "url": "",
         "voting_end_date": "",
-        "hash": "",
-        "title": ""
+        "voting_start_date": ""
     }
 
     '''
