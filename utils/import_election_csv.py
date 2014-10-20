@@ -174,7 +174,7 @@ def read_csv_to_dicts(path):
       "randomize_answer_order":False,
       "min":0,
       "max":1,
-      "num_winners":1,
+      "num_seats":1,
       "answers":[]
     }
     baseopt = {
