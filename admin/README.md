@@ -47,7 +47,7 @@ In an election directory (admin/elections/your_election) edit config.json. examp
     {
       "election-id": "1",
       "director": "wadobo-auth1",
-      "authorities": "wadobo-auth2"
+      "authorities": "wadobo-auth2",
       "title": "Test election",
       "url": "https://example.com/election/url",
       "description": "election description",
