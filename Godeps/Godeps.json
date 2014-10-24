@@ -8,15 +8,15 @@
 		},
 		{
 			"ImportPath": "github.com/agoravoting/agora-http-go/middleware",
-			"Rev": "89f2b772c02daefe5c64df1db337c9bfcf873ce2"
+			"Rev": "a8c5ac626bb115285937574843d0b1f20c0a20ec"
 		},
 		{
 			"ImportPath": "github.com/agoravoting/agora-http-go/server",
-			"Rev": "89f2b772c02daefe5c64df1db337c9bfcf873ce2"
+			"Rev": "a8c5ac626bb115285937574843d0b1f20c0a20ec"
 		},
 		{
 			"ImportPath": "github.com/agoravoting/agora-http-go/util",
-			"Rev": "89f2b772c02daefe5c64df1db337c9bfcf873ce2"
+			"Rev": "a8c5ac626bb115285937574843d0b1f20c0a20ec"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/negroni",
