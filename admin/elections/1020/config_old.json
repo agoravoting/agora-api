@@ -1,0 +1,166 @@
+{
+    "id":1020,
+    "hash": "",
+    "pretty_name":"Votación de borradores",
+    "description":"Vota los borradores para decidir la forma de organización interna de Podemos. Estas cinco resoluciones se convertirán en cinco consensos fundamentales de Podemos, cinco ejes de trabajo político colectivo, cinco hitos del proceso democratizador más grande que ha conocido este país y que estamos construyendo entre todos y todas. Porque juntos, Podemos!",
+    "title":"votacion-de-borradores",
+    "layout": "drafts-election",
+    "voting_start_date": "2013-12-06T18:17:14.457000",
+    "voting_end_date": "2013-12-09T18:17:14.457000",
+    "is_recurring": false,
+    "director": "wadobo-auth1",
+    "authorities": "openkratio-authority",
+    "url": "http://podemos.info",
+    "extra": [],
+    "min": 0,
+    "max": 3,
+    "questions_data":[
+      {
+        "a":"ballot/question",
+        "question":"¿Qué Documento Ético prefieres que se incorpore a los estatutos?",
+        "description": "Documento Ético",
+        "layout":"drafts-election",
+        "tally_type":"APPROVAL",
+        "randomize_answer_order":false,
+        "max":1,
+        "min":0,
+        "num_seats":1,
+        "answers":[
+          {
+            "id": 1,
+            "media_url":"",
+            "details_title":"",
+            "details":"Firmantes: fulanito, menganito de tal, zutanito, el parriba, el salao, aquel de más allá, johnny, el médico del pueblo, etc, etc.",
+            "value":"Propuesta de Pablo Iglesias",
+            "a":"ballot/answer",
+            "isPack": true,
+            "urls":[
+              {"title": "VER", "url": "https://example.com"}
+            ]
+          },
+          {
+            "id": 2,
+            "media_url":"",
+            "details_title":"",
+            "details":"Firmantes: fulanito, menganito de tal, zutanito, el parriba, el salao, aquel de más allá, johnny, el médico del pueblo, etc, etc.",
+            "value":"Propuesta de Victor García",
+            "a":"ballot/answer",
+            "isPack": false,
+            "urls":[
+              {"title": "VER", "url": "https://example.com"}
+            ]
+          },
+          {
+            "id": 3,
+            "media_url":"",
+            "details_title":"",
+            "details":"Firmantes: fulanito, menganito de tal, zutanito, el parriba, el salao, aquel de más allá, johnny, el médico del pueblo, etc, etc.",
+            "value":"Propuesta de Pablo Echenique",
+            "a":"ballot/answer",
+            "isPack": false,
+            "urls":[
+              {"title": "VER", "url": "https://example.com"}
+            ]
+          }
+        ]
+      },
+      {
+        "a":"ballot/question",
+        "question":"¿Qué Documento Político prefieres que se incorpore a los estatutos?",
+        "description": "Documento Político",
+        "layout":"accordion",
+        "tally_type":"APPROVAL",
+        "randomize_answer_order":false,
+        "max":1,
+        "min":0,
+        "num_seats":1,
+        "answers":[
+          {
+            "id": 1,
+            "media_url":"",
+            "details_title":"",
+            "details":"Firmantes: fulanito, menganito de tal, zutanito, el parriba, el salao, aquel de más allá, johnny, el médico del pueblo, etc, etc.",
+            "value":"Propuesta de Pablo Iglesias",
+            "a":"ballot/answer",
+            "isPack": true,
+            "urls":[
+              {"title": "VER", "url": "https://example.com"}
+            ]
+          },
+          {
+            "id": 2,
+            "media_url":"",
+            "details_title":"",
+            "details":"Firmantes: fulanito, menganito de tal, zutanito, el parriba, el salao, aquel de más allá, johnny, el médico del pueblo, etc, etc.",
+            "value":"Propuesta de Johnny",
+            "a":"ballot/answer",
+            "isPack": false,
+            "urls":[
+              {"title": "VER", "url": "https://example.com"}
+            ]
+          },
+          {
+            "id": 3,
+            "media_url":"",
+            "details_title":"",
+            "details":"Firmantes: fulanito, menganito de tal, zutanito, el parriba, el salao, aquel de más allá, johnny, el médico del pueblo, etc, etc.",
+            "value":"Propuesta de Pablo Echenique",
+            "a":"ballot/answer",
+            "isPack": false,
+            "urls":[
+              {"title": "VER", "url": "https://example.com"}
+            ]
+          }
+        ]
+      },
+      {
+        "a":"ballot/question",
+        "question":"¿Qué Documento Organizativo prefieres que se incorpore a los estatutos?",
+        "description": "Documento Organizativo",
+        "layout":"accordion",
+        "tally_type":"APPROVAL",
+        "randomize_answer_order":false,
+        "max":1,
+        "min":0,
+        "num_seats":1,
+        "answers":[
+          {
+            "id": 1,
+            "media_url":"",
+            "details_title":"",
+            "details":"Firmantes: fulanito, menganito de tal, zutanito, el parriba, el salao, aquel de más allá, johnny, el médico del pueblo, etc, etc.",
+            "value":"Propuesta de Pablo Iglesias",
+            "isPack": true,
+            "a":"ballot/answer",
+            "urls":[
+              {"title": "VER", "url": "https://example.com"}
+            ]
+          },
+          {
+            "id": 2,
+            "media_url":"",
+            "details_title":"",
+            "details":"Firmantes: fulanito, menganito de tal, zutanito, el parriba, el salao, aquel de más allá, johnny, el médico del pueblo, etc, etc.",
+            "value":"Propuesta de Menganito",
+            "a":"ballot/answer",
+            "isPack": false,
+            "urls":[
+              {"title": "VER", "url": "https://example.com"}
+            ]
+          },
+          {
+            "id": 3,
+            "media_url":"",
+            "details_title":"",
+            "details":"Firmantes: fulanito, menganito de tal, zutanito, el parriba, el salao, aquel de más allá, johnny, el médico del pueblo, etc, etc.",
+            "value":"Propuesta de Pablo Echenique",
+            "a":"ballot/answer",
+            "isPack": false,
+            "urls":[
+              {"title": "VER", "url": "https://example.com"}
+            ]
+          }
+        ]
+      }
+    ]
+}

@@ -1,0 +1,993 @@
+{
+    "authorities": "openkratio-authority",
+    "description": "Selecciona los documentos político, ético y organizativo con los que Podemos",
+    "director": "wadobo-auth1",
+    "extra": [],
+    "hash": "",
+    "id": 10208,
+    "is_recurring": false,
+    "layout": "drafts-election",
+    "max": 3,
+    "min": 0,
+    "pretty_name": "Votación de documentos",
+    "questions_data": [
+        {
+            "a": "ballot/question",
+            "answers": [
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Carolina Huelmo Vallejo, Cristina Olivan Aceituno, Jordi Fortuny Pintaluba, Óscar Martín Muñoz, Xavier Murgui González",
+                    "details_title": "",
+                    "id": 1,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 3,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/CONTRATO-ÉTICO-VINCULANTE.-CÍRCULO-PODEMOS-ENFERMRAS.-ASAMBLEA-CIUDADANA.pdf"
+                        }
+                    ],
+                    "value": "Equipo Enfermeras"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Pablo Iglesias, Íñigo Errejón, Juan Carlos Monedero, Carolina Bescansa, Luis Alegre",
+                    "details_title": "",
+                    "id": 2,
+                    "isPack": true,
+                    "media_url": "",
+                    "sort_order": 6,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Compromiso-Ético.pdf"
+                        }
+                    ],
+                    "value": "Claro Que Podemos - Equipo Pablo Iglesias"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Jacinto Morano González, Alicia Gómez Benítez, Carlos Sevilla, Clara Tomás Azorín, Rafael Polo Guardo",
+                    "details_title": "",
+                    "id": 3,
+                    "isPack": true,
+                    "media_url": "",
+                    "sort_order": 9,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo-109-Documento-Principios-Éticos.pdf"
+                        }
+                    ],
+                    "value": "Juristas Madrid"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Ángel de la Osa Beltrán, José Abeledo González, Julián Mateo Tortajada, María Begoña Bilbao Gastelu Olga Rodríguez",
+                    "details_title": "",
+                    "id": 4,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 14,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/365724074-BORRADOR-ÉTICO-ÉTICA-Y-TRANSPARENCIA-FUSIONES-DEFINITIVAS.pdf"
+                        }
+                    ],
+                    "value": "Ética y transparencia"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Daniel Ripa, Xandru Fernandez, Berta Dominguez Kaiser, Viviana de Sans, Rafael Gonzalez",
+                    "details_title": "",
+                    "id": 5,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 22,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Podemos-Participación-Transparencia-y-Democracia.pdf.pdf"
+                        }
+                    ],
+                    "value": "Podemos Participar Más"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "José Antonio Gonzalez",
+                    "details_title": "",
+                    "id": 6,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 24,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/DOCUMENTO-ETICO-CONSTRUYENDO-CIUDADANIA-PARA-TODAS-LAS-PERSONAS.pdf"
+                        }
+                    ],
+                    "value": "Construyendo ciudadanía para todas las personas"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Luis Montes Sevilla, Sergio Correas Cebrian, Rafael Mercader, Pedro Herreros Guerra, Victor García Llorens",
+                    "details_title": "",
+                    "id": 7,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 31,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo64-Propuesta-de-Principios-Éticos.pdf"
+                        }
+                    ],
+                    "value": "Equipo 64"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "David Martínez Clemente, Pablo García Roza, Susana Soto Colomo, Jose Antonio Arce Egüen, Enrique Granda Sierra, Juan Ignacio Leiva Marquez",
+                    "details_title": "",
+                    "id": 8,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 41,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/BORRADOR-PRINCIPIOS-ETICOS.pdf"
+                        }
+                    ],
+                    "value": "Equipo 97"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Antonio Muñoz Ballesta, Tomás Corbalán Corbalán, Raúl Radovich Iovanovich, Jesús Zaragoza España, Jesús Correa Romero",
+                    "details_title": "",
+                    "id": 9,
+                    "isPack": true,
+                    "media_url": "",
+                    "sort_order": 43,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo-103-Documento-Principios-Éticos.pdf"
+                        }
+                    ],
+                    "value": "Sí se Puede"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Carmelo Romero, José Ángel Martínez, Leonor Lahoz Goig, Ana Barca, Armando Vinuesa Matesanz",
+                    "details_title": "",
+                    "id": 10,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 50,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo159-Propuesta-de-Principios-Éticos.pdf"
+                        }
+                    ],
+                    "value": "Porque, sin ética, la política es otra cosa"
+                }
+            ],
+            "description": "",
+            "layout": "drafts-election",
+            "max": 1,
+            "min": 0,
+            "num_seats": 1,
+            "question": "Documento Ético",
+            "randomize_answer_order": false,
+            "tally_type": "APPROVAL"
+        },
+        {
+            "a": "ballot/question",
+            "answers": [
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Carolina Huelmo Vallejo, Cristina Olivan Aceituno, Jordi Fortuny Pintaluba, Óscar Martín Muñoz, Xavier Murgui González",
+                    "details_title": "",
+                    "id": 1,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 4,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/DOCUMENTO-POLITICO.-CÍRCULO-PODEMOS-ENFERMRAS.-ASAMBLEA-CIUDADANA.pdf"
+                        }
+                    ],
+                    "value": "Equipo Enfermeras"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Pablo Iglesias, Íñigo Errejón, Juan Carlos Monedero, Carolina Bescansa, Luis Alegre",
+                    "details_title": "",
+                    "id": 2,
+                    "isPack": true,
+                    "media_url": "",
+                    "sort_order": 7,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Documento-Político.pdf"
+                        }
+                    ],
+                    "value": "Claro Que Podemos - Equipo Pablo Iglesias"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Jacinto Morano González, Alicia Gómez Benítez, Carlos Sevilla, Clara Tomás Azorín, Rafael Polo Guardo",
+                    "details_title": "",
+                    "id": 3,
+                    "isPack": true,
+                    "media_url": "",
+                    "sort_order": 10,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo109-Propuesta-de-Principios-Políticos.pdf"
+                        }
+                    ],
+                    "value": "Juristas Madrid"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Vicente Manuel Cortés, Olga Rodríguez, Sergio Rocafort, Yoel Pérez Bernal, Domingo Javier Jiménez",
+                    "details_title": "",
+                    "id": 4,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 13,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/DemocraciaRadical.pdf"
+                        }
+                    ],
+                    "value": "Democracia Radical"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Miguel Carrera García, Inma del Pino Fernández, Chema García Chía, Roberto del Tío Moreno, Pablo Castilla Rivas",
+                    "details_title": "",
+                    "id": 5,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 15,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/DEMOCRACIA-Y-JUSTICIA-SOCIAL-ponencia-política-EQUIPO-4.pdf"
+                        }
+                    ],
+                    "value": "Democracia y Justicia Social"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Libertad López Expósito",
+                    "details_title": "",
+                    "id": 6,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 16,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/documento-ético-transaccionado-por-10-circulos.pdf"
+                        }
+                    ],
+                    "value": "Equipo 10 Círculos"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Yoelsy Pérez Bernal, José Manuel García Expósito, José María Sánchez Cebada, José Antonio Jiménez Mariño, Manuel Joaquín Moguer",
+                    "details_title": "",
+                    "id": 7,
+                    "isPack": true,
+                    "media_url": "",
+                    "sort_order": 18,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/DEMOCRACIA-Y-JUSTICIA-SOCIAL-ponencia-política-EQUIPO-4.pdf"
+                        }
+                    ],
+                    "value": "Equipo 9"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Clara Marañón Heras, Manuel Garí Ramos, Miguel Barrionuevo Molino, Ana Gil Rituerto, José Luis Mateos Fernández",
+                    "details_title": "",
+                    "id": 8,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 21,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Construyendo-Pueblo.-Documento-politico-para-la-Asamblea-Ciudadana-de-Podemos.pdf"
+                        }
+                    ],
+                    "value": "Construyendo Pueblo"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Luis A. Osorio Moure, Alejandro Arias Redondo, Josefina Martínez, Antonio Liz Vázquez, Juan Carlos Arias Sanz",
+                    "details_title": "",
+                    "id": 9,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 23,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Con-lxs-trabajadorxs-PODEMOS-Borrador-de-PRINCIPIOS-POLITICOS.pdf"
+                        }
+                    ],
+                    "value": "Con lxs trabajadorxs Podemos!"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Daniel Martín Sanjuán, Antonio José Rosales García, Juan Molina Gómez, José Carlos Vidal Suárez, Carlos Fernández Aragón",
+                    "details_title": "",
+                    "id": 10,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 27,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Con-tu-Voz-Sí-se-Puede-Documento-Político.pdf"
+                        }
+                    ],
+                    "value": "Con tu Voz, Sí se Puede"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Mª Jesús Martín Gonzalez",
+                    "details_title": "",
+                    "id": 11,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 28,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo60_-_Propuesta_de_Principios_Pol_ticos.pdf"
+                        }
+                    ],
+                    "value": "Equipo 60"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Estefania Schweich Temprano, Juan Manuel González Cañas, David Enriquez Gracía, Enrique Castro Flores, Pablo Carralero Ortiz",
+                    "details_title": "",
+                    "id": 12,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 29,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Círculo-Carabanchel-Latina-PCL-Ponencia-Política-Documento-final1.pdf"
+                        }
+                    ],
+                    "value": "Equipo 63"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Cristóbal José Luque Ramírez",
+                    "details_title": "",
+                    "id": 13,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 32,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo67-Propuesta-de-Principios-Políticos.pdf"
+                        }
+                    ],
+                    "value": "Equipo 67"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Luz Amado Canillas, Adolfo Ranero Serrano, Carlos Valentín Palmeiro, Julio Cárabe López, Oscar Dulce Recio",
+                    "details_title": "",
+                    "id": 14,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 35,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Principios-políticos-Equipo-73-Colmenar-Viejo.pdf"
+                        }
+                    ],
+                    "value": "Equipo 73"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Rafael Tejero Ibancos, María Carrascosa Porras, Ascensión Cano Pardo, Juan Manuel Fandila Enrique, Carmen Rivero Hernández",
+                    "details_title": "",
+                    "id": 15,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 38,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Propuesta-de-pon.-política-_as.-ciu.pdf"
+                        }
+                    ],
+                    "value": "Equipo 89"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Pedro J. Collado Gomez, Juanma Brun, Ana Gil, Maxi Vallejo, Graciela Gutierrez",
+                    "details_title": "",
+                    "id": 16,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 40,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Claro_que_Podemos_Democracia_Municipal.pdf"
+                        }
+                    ],
+                    "value": "Claro que podemos,... Democracia Ciudadana"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Teresa Varela García, Luís Bodoque Gómez, Carlos Rossique Delmas, Jesus Arguedas Rizzo, Silvio Domínguez González",
+                    "details_title": "",
+                    "id": 17,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 45,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo-134-Documento-Principios-Politicos_FINAL.pdf"
+                        }
+                    ],
+                    "value": "Junt@s podemos"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Víctor Fernández Rojas, Víctor López Díaz, Leopoldo Cardeña, Rebeca Acevedo García, Mercedes Paredes",
+                    "details_title": "",
+                    "id": 18,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 47,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Borrador-final-Equipo137Equipo85.pdf"
+                        }
+                    ],
+                    "value": "Equipo 137"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Carlos Rosetti, Antonio Martínez Luján, Raúl Jiménez, Roque Lozano, Vicente Serrano",
+                    "details_title": "",
+                    "id": 19,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 48,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Ponencia-Sindicalismo-y-Modelo-Económico-Prin.-POLÍTICOS-rev.pdf"
+                        }
+                    ],
+                    "value": "Sindicalismo y modelo económico"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Carmelo Romero, José Ángel Martínez, Leonor Lahoz Goig, Ana Barca, Armando Vinuesa Matesanz",
+                    "details_title": "",
+                    "id": 20,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 51,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo159-Propuesta-de-Principios-Políticos.pdf"
+                        }
+                    ],
+                    "value": "Proceso constituyente"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "",
+                    "details_title": "",
+                    "id": 21,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 52,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Manifiesto-Político_Transformación-social-y-colapso-civilizatorio.pdf"
+                        }
+                    ],
+                    "value": "Instrumento de Transformación"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Rubén Fernández-Avilés López-Lillo, Irene Estalayo Ruiz, Miguel Ángel García Guerrero, Julián Fernández-Avilés Saez, Pilar Saez Bravo",
+                    "details_title": "",
+                    "id": 22,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 54,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/LA-HORA-DE-LA-GENTE-DECENTE-borrador-de-principios-éticos.pdf"
+                        }
+                    ],
+                    "value": "La Hora de la Gente Decente"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Toni Bennàssar Jaume Vila Lola Sánchez Francisca Tugores Teresa Sánchez",
+                    "details_title": "",
+                    "id": 23,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 57,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/REPUBLICA-DEMOCRÁTICA-Y-SOCIAL.pdf"
+                        }
+                    ],
+                    "value": "República Democrática y Social"
+                }
+            ],
+            "description": "",
+            "layout": "drafts-election",
+            "max": 1,
+            "min": 0,
+            "num_seats": 1,
+            "question": "Documento Político",
+            "randomize_answer_order": false,
+            "tally_type": "APPROVAL"
+        },
+        {
+            "a": "ballot/question",
+            "answers": [
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Carolina Huelmo Vallejo, Cristina Olivan Aceituno, Jordi Fortuny Pintaluba, Óscar Martín Muñoz, Xavier Murgui González",
+                    "details_title": "",
+                    "id": 1,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 5,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/DOCUMENTO-ORGANIZATIVO.-CÍRCULO-PODEMOS-ENFERMRAS.-ASAMBLEA-CIUDADANA.pdf"
+                        }
+                    ],
+                    "value": "Equipo Enfermeras"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Pablo Iglesias, Íñigo Errejón, Juan Carlos Monedero, Carolina Bescansa, Luis Alegre",
+                    "details_title": "",
+                    "id": 2,
+                    "isPack": true,
+                    "media_url": "",
+                    "sort_order": 8,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Documento-Organizativo-Claro-que-Podemos.pdf"
+                        }
+                    ],
+                    "value": "Claro Que Podemos - Equipo Pablo Iglesias"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Jacinto Morano González, Alicia Gómez Benítez, Carlos Sevilla, Clara Tomás Azorín, Rafael Polo Guardo",
+                    "details_title": "",
+                    "id": 3,
+                    "isPack": true,
+                    "media_url": "",
+                    "sort_order": 11,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo109-Propuesta-de-Principios-Organizativos.pdf"
+                        }
+                    ],
+                    "value": "Juristas Madrid"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Pablo Echenique, Teresa Rodriguez, Victor Garcia, Lola Sanchez, Diego Pacheco",
+                    "details_title": "",
+                    "id": 4,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 12,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Sumando-Podemos-.Documento-organizativo.pdf"
+                        }
+                    ],
+                    "value": "Sumando Podemos"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Daniel Arnaiz, Pilar Ramos Moreno, Juan Ignacio Leiva Márquez, Jorge Valencia Álvarez, Gonzalo Díaz Tomasich",
+                    "details_title": "",
+                    "id": 5,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 17,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/De-los-Principios-Organizativos-de-Podemos-Decide-la-Ciudadanía.pdf"
+                        }
+                    ],
+                    "value": "Decide la Ciudadanía"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Yoelsy Pérez Bernal, José Manuel García Expósito, José María Sánchez Cebada, José Antonio Jiménez Mariño, Manuel Joaquín Moguer",
+                    "details_title": "",
+                    "id": 6,
+                    "isPack": true,
+                    "media_url": "",
+                    "sort_order": 19,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo9-Propuesta-de-Principios-Organizativos.pdf"
+                        }
+                    ],
+                    "value": "Equipo 9"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Aitor J. Novo López, Miren Alonso Álvarez, Breogán Riobóo Lois, Juan Rioja Lema, Borja San Ramón Tizón",
+                    "details_title": "",
+                    "id": 7,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 20,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Sumamos-Modelo-organizativo.pdf"
+                        }
+                    ],
+                    "value": "Sumamos"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Jesús Arroyo Hernandez",
+                    "details_title": "",
+                    "id": 8,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 25,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo47-Propuesta-de-Principios-Organizativos.pdf"
+                        }
+                    ],
+                    "value": "Equipo 47"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Carmen Fajardo Barba, Miguel Ángel Aguilar Avilés, Estefanía García Cajo, José Mª Aguilar Idáñez, María Sotos Serrano",
+                    "details_title": "",
+                    "id": 9,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 26,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Sí-se-puede.-Principios-organizativos-ALBACETE-DEFINITIVO-PARA-ASAMBLEA.pdf"
+                        }
+                    ],
+                    "value": "Equipo 57"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Estefania Schweich Temprano, Juan Manuel González Cañas, David Enriquez Gracía, Enrique Castro Flores, Pablo Carralero Ortiz",
+                    "details_title": "",
+                    "id": 10,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 30,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Círculo-Carabanchel-Latina-PCL-Propuesta-Organizativa-Documento-final.pdf"
+                        }
+                    ],
+                    "value": "Equipo 63"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Cristóbal José Luque Ramírez",
+                    "details_title": "",
+                    "id": 11,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 33,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Borrador-organización-Alcosanse.pdf"
+                        }
+                    ],
+                    "value": "Equipo 67"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Olga Fernandez Lopez, Ana Pellón Herrera, Juan Carlos Rodriguez Rodriguez, Jose Alberto Rodriguez Rodriguez, Juan Francisco Cosido Cobos",
+                    "details_title": "",
+                    "id": 12,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 34,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Propuesta-Organizativa_Equipo69.pdf"
+                        }
+                    ],
+                    "value": "Equipo 69"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Ángel N. Cachón Gutiérrez, Joaquin López, Ana Aladro, Goyo Cejas, Javier Marcos",
+                    "details_title": "",
+                    "id": 13,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 36,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Entre-todos-SI-PODEMOS..pdf"
+                        }
+                    ],
+                    "value": "Entre todos sí Podemos"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Acacia Martín, Angel Amador, Celia Montelongo, Mikel Ardanaz, Xulio Costas Estevez",
+                    "details_title": "",
+                    "id": 14,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 37,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/PodemosFederarnosFusion.pdf"
+                        }
+                    ],
+                    "value": "Podemos Federarnos"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Rafael Tejero Ibancos, María Carrascosa Porras, Ascensión Cano Pardo, Juan Manuel Fandila Enrique, Carmen Rivero Hernández",
+                    "details_title": "",
+                    "id": 15,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 39,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/2PROPUEST-ORGANIZ.pdf"
+                        }
+                    ],
+                    "value": "Equipo 89"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "David Martínez Clemente, Pablo García Roza, Susana Soto Colomo, Jose Antonio Arce Egüen, Enrique Granda Sierra, Juan Ignacio Leiva Marquez",
+                    "details_title": "",
+                    "id": 16,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 42,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Borrador-definitivo-SI-PODEMOS.pdf"
+                        }
+                    ],
+                    "value": "Sí podemos"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Antonio Muñoz Ballesta, Tomás Corbalán Corbalán, Raúl Radovich Iovanovich, Jesús Zaragoza España, Jesús Correa Romero",
+                    "details_title": "",
+                    "id": 17,
+                    "isPack": true,
+                    "media_url": "",
+                    "sort_order": 44,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo40-Propuesta-de-Principios-Organizativos.pdf"
+                        }
+                    ],
+                    "value": "Sí se Puede"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Teresa Varela García, Luís Bodoque Gómez, Carlos Rossique Delmas, Jesus Arguedas Rizzo, Silvio Domínguez González",
+                    "details_title": "",
+                    "id": 18,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 46,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Equipo-134-Documento-Principios-Organizativos.pdf"
+                        }
+                    ],
+                    "value": "Junt@s podemos"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Miguel Carrera García, Pablo Castillo Rivas, José María García Chía, Inma del Pino, Roberto del Tío Moreno",
+                    "details_title": "",
+                    "id": 19,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 49,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/PROPUESTA-SOBRE-LOS-CÍRCULOS-DEL-EXTERIOR.pdf"
+                        }
+                    ],
+                    "value": "Podemos México. Propuesta sobre los círculos del exterior"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "",
+                    "details_title": "",
+                    "id": 20,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 53,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/DO-Podemos-instrumento-de-cambio-político-y-social.pdf"
+                        }
+                    ],
+                    "value": "Instrumento de Transformación"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Sergio Llamas Sobrino, Angels Bodí, Rubén Ferrer, Jorge Martorell Sanchís, Jose Ignacio González",
+                    "details_title": "",
+                    "id": 21,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 55,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Borrador-de-principios-organizativos-Máximas-competencias-para-la-asamblea.pdf"
+                        }
+                    ],
+                    "value": "Máximas Competencias para la Asamblea"
+                },
+                {
+                    "a": "ballot/answer",
+                    "category": "",
+                    "details": "Roberto Mazorra, Juan Manuel Brun, Rosana Alonso, Kevin Botejara, María Cano",
+                    "details_title": "",
+                    "id": 22,
+                    "isPack": false,
+                    "media_url": "",
+                    "sort_order": 56,
+                    "urls": [
+                        {
+                            "title": "Ver",
+                            "url": "https://web-podemos.s3.amazonaws.com/wordpress/wp-content/uploads/2014/10/Borrador-Organizativo.pdf"
+                        }
+                    ],
+                    "value": "Podemos ir Más Allá"
+                }
+            ],
+            "description": "",
+            "layout": "drafts-election",
+            "max": 1,
+            "min": 0,
+            "num_seats": 1,
+            "question": "Documento Organizativo",
+            "randomize_answer_order": false,
+            "tally_type": "APPROVAL"
+        }
+    ],
+    "title": "votacion-de-borradores",
+    "url": "http://podemos.info",
+    "voting_end_date": "2013-12-09T18:17:14.457000",
+    "voting_start_date": "2013-12-06T18:17:14.457000"
+}

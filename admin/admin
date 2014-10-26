@@ -460,28 +460,46 @@ def count_votes(cfg, args):
 def dump_votes_eo(cfg, args):
     conn = get_db_connection(cfg['backendCfg']['db'])
     votes = votes_table()
-    vs = conn.execute(text("select distinct on (voter_id) vote, election_id from votes where election_id in :ids order by voter_id, election_id desc"), ids=tuple(args.command[1:]))
+    vs = conn.execute(text("select distinct on (voter_id) vote, voter_id, election_id from votes where election_id in :ids order by voter_id, election_id desc"), ids=tuple(args.command[1:])).fetchall()
     f = cfg['ciphertexts']
     path = os.path.join(cfg['electionCfg']['path'], f)
     votes_files = dict()
+
+    valid_votes = set()
+    check_ids = (len(args.voter_ids_path) > 0)
+    if check_ids:
+        with codecs.open(args.voter_ids_path, encoding='utf-8', mode='r') as vip:
+            for line in vip:
+                valid_votes.add(line.strip())
+
     for election_id in args.command[1:]:
         path = os.path.join(ELECTIONS_DIR, election_id, 'ctexts_' + election_id)
         votes_files[election_id] = dict(
             total=0,
+            filtered=0,
             file=codecs.open(path, encoding='utf-8', mode='w+')
         )
 
-        for vote in vs:
-            meta = votes_files[vote['election_id']]
-            meta['file'].write(vote['vote'] + "\n")
-            meta["total"] += 1
+    for vote in vs:
+        meta = votes_files[vote['election_id']]
+
+        # filter only for valid votes
+        if check_ids:
+            if vote['voter_id'] not in valid_votes:
+                meta["filtered"] += 1
+                continue
+
+        meta['file'].write(vote['vote'] + "\n")
+        meta["total"] += 1
 
     total = 0
-    for eid, meta in votes_files:
+    filtered = 0
+    for eid, meta in votes_files.items():
         total += meta['total']
-        print("> dumped %d votes to %s" % (meta['total'], eid))
+        filtered += meta['filtered']
+        print("> dumped %d votes to %s (%d filtered)" % (meta['total'], eid, meta['filtered']))
         meta['file'].close()
-    print("> dumped %d votes in total" % total)
+    print("> dumped %d votes in total (%d filtered)" % (total, filtered))
 
 # dumps votes a format suitable for backup/restore
 def dump_votes_full(cfg, args):
@@ -622,6 +640,7 @@ eotest <election_dir>: runs a full eo test cycle''')
     parser.add_argument('--plaintexts', help='json file to read votes from when encrypting', default = 'votes.json')
     parser.add_argument('--encrypt-count', help='number of votes to encrypt (generates duplicates if more than in json file)', type=int, default = 0)
     parser.add_argument('-f', '--filters', nargs='+', default=[], help="key==value(s) filters for queries (use ~ for like)")
+    parser.add_argument('--voter-ids-path', nargs='?', default=[], help="Path to a file with valid voter ids for filtering")
     args = parser.parse_args()
     command = args.command[0]
     if hasattr(__main__, command):
