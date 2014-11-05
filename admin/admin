@@ -501,6 +501,31 @@ def dump_votes_eo(cfg, args):
         meta['file'].close()
     print("> dumped %d votes in total (%d filtered)" % (total, filtered))
 
+
+# prints voter ids
+def print_voterids(cfg, args):
+    conn = get_db_connection(cfg['backendCfg']['db'])
+    votes = votes_table()
+    vs = conn.execute(text("select distinct on (voter_id) vote, voter_id, election_id from votes where election_id in :ids order by voter_id, election_id desc"), ids=tuple(args.command[1:])).fetchall()
+    f = cfg['ciphertexts']
+    path = os.path.join(cfg['electionCfg']['path'], f)
+
+    valid_votes = set()
+    check_ids = (len(args.voter_ids_path) > 0)
+    if check_ids:
+        with codecs.open(args.voter_ids_path, encoding='utf-8', mode='r') as vip:
+            for line in vip:
+                valid_votes.add(line.strip())
+
+    for vote in vs:
+        # filter only for valid votes
+        if check_ids:
+            if vote['voter_id'] not in valid_votes:
+                continue
+
+        print(vote['voter_id'])
+
+
 # dumps votes a format suitable for backup/restore
 def dump_votes_full(cfg, args):
     conn = get_db_connection(cfg['backendCfg']['db'])
@@ -631,6 +656,7 @@ list_votes <election_dir>: list votes
 list_elections: list elections (under ELECTIONS_DIR)
 count_votes <election_dir> [<election_dir2> [<election_dir3> [..]]]: count votes
 dump_votes_eo <election_dir> [<election_dir2> [<election_dir3> [..]]]: dumps votes ready for eo
+print_voterids <election_dir> [<election_dir2> [<election_dir3> [..]]]: prints voter ids
 dump_votes_full <election_dir>: dumps votes in local format
 console <data>: executes a console
 eotest <election_dir>: runs a full eo test cycle''')
