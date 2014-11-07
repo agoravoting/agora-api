@@ -218,7 +218,6 @@ def read_csv_to_dicts(path):
                 if len(values) >= 4:
                     item['sort_order'] = n
                     item['value'] = values[1].strip()
-                    item['value'] = values[1].strip()
                     item['details'] = values[2].strip().replace('"', '')
                     item['urls'][0]['url'] = values[0].strip()
                     divisible = (len(values) > 4 and values[4].strip().lower())
