@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"path"
 	"os"
+	"math/big"
 	"fmt"
 )
 
@@ -22,17 +23,21 @@ type BallotBox struct {
 	insertStmt *sqlx.Stmt
 	getStmt    *sqlx.Stmt
 	maxWrites  int
-}
 
-// TODO: move inside BallotBox
-var configs = make(map[string]string)
-var pubkeys = make(map[string]string)
+	configs map[string]string
+	pubkeys map[string]string
+	pubkeyObjects map[string][]map[string]*big.Int
+}
 
 func (bb *BallotBox) Name() string {
 	return bb.name
 }
 
 func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
+	bb.configs = make(map[string]string)
+	bb.pubkeys = make(map[string]string)
+	bb.pubkeyObjects = make(map[string][]map[string]*big.Int)
+
 	var ballotboxSessionExpire int
 	json.Unmarshal(*cfg["ballotboxSessionExpire"], &ballotboxSessionExpire)
 	var maxWrites int
@@ -98,7 +103,7 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 			}
 
 			s.Server.Logger.Printf("Loaded config file for election %s", electionId)
-			configs[electionId] = cfgText
+			bb.configs[electionId] = cfgText
 
 			// read pk_<election-id>
 			pkPath := path.Join(electionDir, f.Name(), "pk_" + electionId)
@@ -120,7 +125,40 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 				s.Server.Logger.Printf("Error reading pubkey file %s %v, skipping", pkPath, err)
 				continue
 			}
-			pubkeys[electionId] = pkText
+			bb.pubkeys[electionId] = pkText
+
+			var pksDecoded []interface{}
+			if err := json.Unmarshal([]byte(pkText), &pksDecoded); err != nil {
+    			s.Server.Logger.Printf("Error reading pubkey file %s %v, skipping", pkPath, err)
+				continue
+    		}
+
+    		keys := make([]map[string]*big.Int, len(pksDecoded))
+
+    		for index,element := range pksDecoded {
+    			next := element.(map[string]interface{})
+    			_modulus := next["p"].(string)
+    			_generator := next["g"].(string)
+
+    			modulus := big.NewInt(0)
+        		_, ok := modulus.SetString(_modulus, 10)
+        		if ! ok {
+        			s.Server.Logger.Printf("Error reading pubkey(p) file %s, skipping", pkPath)
+					continue
+        		}
+        		generator := big.NewInt(0)
+        		_, ok = generator.SetString(_generator, 10)
+        		if ! ok {
+        			s.Server.Logger.Printf("Error reading pubkey(g) file %s, skipping", pkPath)
+					continue
+        		}
+        		key := make(map[string]*big.Int)
+        		key["p"] = modulus
+        		key["g"] = generator
+
+        		keys[index] = key
+    		}
+    		bb.pubkeyObjects[electionId] = keys
 		}
 	}
 
@@ -185,7 +223,7 @@ func (bb *BallotBox) getElectionConfig(w http.ResponseWriter, r *http.Request, p
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	config, ok := configs[electionId]
+	config, ok := bb.configs[electionId]
 	if !ok {
 		return &middleware.HandledError{Err: err, Code: 404, Message: "Not found", CodedMessage: "not-found"}
 	}
@@ -205,7 +243,7 @@ func (bb *BallotBox) getElectionPubKeys(w http.ResponseWriter, r *http.Request, 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	pubkeys, ok := pubkeys[electionId]
+	pubkeys, ok := bb.pubkeys[electionId]
 	if !ok {
 		return &middleware.HandledError{Err: err, Code: 404, Message: "Not found", CodedMessage: "not-found"}
 	}
@@ -215,25 +253,19 @@ func (bb *BallotBox) getElectionPubKeys(w http.ResponseWriter, r *http.Request, 
 	return nil
 }
 
-// add a new vote
 func (bb *BallotBox) postVote(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
 	var (
 		tx    = s.Server.Db.MustBegin()
 		vote  Vote
 		err   error
 	)
-	vote, err = parseVote(r)
+	vote, err = ParseVote(r)
 	if err != nil {
 		return &middleware.HandledError{Err: err, Code: 400, Message: "Invalid json-encoded vote", CodedMessage: "invalid-json"}
-	}
-	vote_json, err := vote.Json()
-	if err != nil {
-		return &middleware.HandledError{Err: err, Code: 500, Message: "Error re-writing the data to json", CodedMessage: "error-json-encode"}
 	}
 
 	electionId := p.ByName("election_id")
 	voterId := p.ByName("voter_id")
-	// ip := r.RemoteAddr
 	ip := r.Header.Get("X-Forwarded-For")
 	if len(ip) == 0 {
 		ip = r.RemoteAddr
@@ -245,11 +277,18 @@ func (bb *BallotBox) postVote(w http.ResponseWriter, r *http.Request, p httprout
 	if voterId == "" {
 		return &middleware.HandledError{Err: err, Code: 400, Message: "No voter_id", CodedMessage: "empty-voter-id"}
 	}
-	vote_json["election_id"] = electionId
-	vote_json["voter_id"] = voterId
+	pks, ok := bb.pubkeyObjects[electionId]
+    if ! ok {
+    	return &middleware.HandledError{Err: err, Code: 400, Message: "Pks not found for election", CodedMessage: "vote-pks-not-found"}
+    }
+    if err := vote.validate(pks); err != nil {
+    	return &middleware.HandledError{Err: err, Code: 400, Message: "Vote validation failed", CodedMessage: "vote-validation-failedj"}
+    }
 
-	var foo string
-	if err = bb.insertStmt.Get(&foo, vote_json["vote"], vote_json["vote_hash"], vote_json["election_id"], vote_json["voter_id"], ip, bb.maxWrites); err != nil {
+	encryptedVoteString := vote.Vote
+
+	var updated string
+	if err = bb.insertStmt.Get(&updated, encryptedVoteString, vote.VoteHash, electionId, voterId, ip, bb.maxWrites); err != nil {
 		tx.Rollback()
 		return &middleware.HandledError{Err: err, Code: 500, Message: "Error calling set_vote", CodedMessage: "error-upsert"}
 	}
@@ -262,25 +301,10 @@ func (bb *BallotBox) postVote(w http.ResponseWriter, r *http.Request, p httprout
 
 	w.WriteHeader(http.StatusAccepted)
 	w.Header().Set("Content-Type", "application/json")
-	var json = fmt.Sprintf("{\"updated\": \"%s\"}", foo)
-	// w.Write([]byte(foo))
+	var json = fmt.Sprintf("{\"updated\": \"%s\"}", updated)
 	w.Write([]byte(json))
 
 	return nil
-}
-
-// parses a vote from a request.
-func parseVote(r *http.Request) (v Vote, err error) {
-	// rb, err := httputil.DumpRequest(r, true)
-	if err != nil {
-		return
-	}
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&v)
-	if err != nil {
-		return
-	}
-	return
 }
 
 // add the modules to available modules on startup
