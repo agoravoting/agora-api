@@ -10,8 +10,6 @@ import (
 	"io"
 	"net/http"
 	"fmt"
-	// j "github.com/gima/jsonv/src"
-	// "io/ioutil"
 )
 
 type Vote struct {
@@ -29,15 +27,31 @@ type Vote struct {
 type EncryptedVote struct {
     A string `json:"a"`
     Choices []*Choice `json:"choices"`
-    ElectionHash ElectionHash `json:"election_hash"`
-    IssueDate time.Time `json:"issue_date"`
+    ElectionHash *ElectionHash `json:"election_hash"`
+    IssueDate *time.Time `json:"issue_date"`
     Proofs []*Popk `json:"proofs"`
 }
 
-/* var	voteSchema = &j.Object{Properties:[]j.ObjectItem{
-	{"vote", &j.String{}},
-	{"vote_hash", &j.String{}},
-}}*/
+type Choice struct {
+    Alpha *big.Int `json:"-"`
+    Beta *big.Int `json:"-"`
+    AlphaString string `json:"alpha"`
+    BetaString string `json:"beta"`
+}
+
+type Popk struct {
+    Challenge *big.Int `json:"-"`
+    Commitment *big.Int `json:"-"`
+    Response *big.Int `json:"-"`
+    ChallengeString string `json:"challenge"`
+    CommitmentString string `json:"commitment"`
+    ResponseString string `json:"response"`
+}
+
+type ElectionHash struct {
+	A string `json:"a"`
+	Value string `json:"value"`
+}
 
 func (v *Vote) validate(electionPks []map[string]*big.Int) error {
 	encryptedVote, err := ParseEncryptedVote([]byte(v.Vote))
@@ -48,17 +62,12 @@ func (v *Vote) validate(electionPks []map[string]*big.Int) error {
     	return err
     }
 
-
-    encryptedVoteString, err := json.Marshal(encryptedVote)
+    encryptedVoteString, err := encryptedVote.Marshal()
     if err != nil {
     	return err
     }
-
     v.Vote = string(encryptedVoteString)
-	h256 := sha256.New()
-   	io.WriteString(h256, v.Vote)
-	_hashed := h256.Sum(nil)
-	hashed := fmt.Sprintf("%x", _hashed)
+    hashed := HashSha256(v.Vote)
 
 	if hashed != v.VoteHash {
 		return errors.New("Vote hash mismatch")
@@ -67,15 +76,66 @@ func (v *Vote) validate(electionPks []map[string]*big.Int) error {
     return nil
 }
 
+func (v *Vote) Map() (ret map[string]interface{}, err error) {
+
+	ret = map[string]interface{}{
+		"id":               v.Id,
+		"vote":        		v.Vote,
+		"vote_hash":        v.VoteHash,
+		"election_id":      v.ElectionId,
+		"voter_id":       	v.VoterId,
+	}
+	return
+}
+
+func (v *Vote) Marshal() ([]byte, error) {
+	j, err := v.Map()
+	if err != nil {
+		return []byte(""), err
+	}
+	return util.JsonSortedMarshal(j)
+}
+
+func ParseVote(r *http.Request) (v Vote, err error) {
+	if err != nil {
+		return
+	}
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&v)
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+
 func (e *EncryptedVote) validate(electionPks []map[string]*big.Int) (err error) {
-	for _, element := range e.Proofs {
-		if err = element.validate(); err != nil {
+	if e.A != "encrypted-vote-v1" {
+		return errors.New("Unexpected a value")
+	}
+
+	if e.ElectionHash == nil {
+		return errors.New("Missing election hash")
+	}
+
+	if e.ElectionHash.A != "hash/sha256/value" {
+		return errors.New("Unexpected a value on election hash")
+	}
+
+	if e.IssueDate == nil {
+		return errors.New("Missing issue date")
+	}
+
+	for _, proof := range e.Proofs {
+		if err = proof.validate(); err != nil {
 			return err
 		}
 	}
 
-	for index, element := range e.Choices {
-		if err = element.validate(electionPks[index]); err != nil {
+	for index, choice := range e.Choices {
+		if err = choice.validate(electionPks[index]); err != nil {
 			return err
 		}
 	}
@@ -125,14 +185,16 @@ func (e *EncryptedVote) checkPopk(electionPks []map[string]*big.Int) error {
 	return nil
 }
 
-type Popk struct {
-    Challenge *big.Int `json:"-"`
-    Commitment *big.Int `json:"-"`
-    Response *big.Int `json:"-"`
-    ChallengeString string `json:"challenge"`
-    CommitmentString string `json:"commitment"`
-    ResponseString string `json:"response"`
+func (e *EncryptedVote) Marshal() ([]byte, error) {
+	return json.Marshal(e)
 }
+
+func ParseEncryptedVote(data []byte) (v *EncryptedVote, err error) {
+	v = &EncryptedVote{}
+	err = json.Unmarshal(data, v)
+	return
+}
+
 
 func (p *Popk) validate() error {
 	p.Challenge = big.NewInt(0)
@@ -156,12 +218,6 @@ func (p *Popk) validate() error {
 	return nil
 }
 
-type Choice struct {
-    Alpha *big.Int `json:"-"`
-    Beta *big.Int `json:"-"`
-    AlphaString string `json:"alpha"`
-    BetaString string `json:"beta"`
-}
 
 func (c *Choice) validate(pk map[string]*big.Int) error {
 	c.Alpha = big.NewInt(0)
@@ -169,9 +225,11 @@ func (c *Choice) validate(pk map[string]*big.Int) error {
 	if ! ok {
 		return errors.New("Error parsing alpha")
 	}
-	residue := quadraticResidue(c.Alpha, pk["p"])
-	if ! residue {
-		return errors.New("Alpha quadratic non-residue")
+	if pk != nil {
+		residue := quadraticResidue(c.Alpha, pk["p"])
+		if ! residue {
+			return errors.New("Alpha quadratic non-residue")
+		}
 	}
 
 	c.Beta = big.NewInt(0)
@@ -179,73 +237,14 @@ func (c *Choice) validate(pk map[string]*big.Int) error {
 	if ! ok {
 		return errors.New("Error parsing Beta")
 	}
-	residue = quadraticResidue(c.Beta, pk["p"])
-	if ! residue {
-		return errors.New("Beta quadratic non-residue")
+	if pk != nil {
+		residue := quadraticResidue(c.Beta, pk["p"])
+		if ! residue {
+			return errors.New("Beta quadratic non-residue")
+		}
 	}
 
 	return nil
-}
-
-type ElectionHash struct {
-	A string `json:"a"`
-	Value string `json:"value"`
-}
-
-func ParseVote(r *http.Request) (v Vote, err error) {
-	if err != nil {
-		return
-	}
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&v)
-
-	if err != nil {
-		return
-	}
-	/* var b []byte
-	if b, err = ioutil.ReadAll(r.Body); err == nil {
-    	var f interface{}
-    	if err = json.Unmarshal(b, &f); err != nil {
-    		return
-    	}
-    	var path string
-    	if path, err = schema.Validate(&f); err == nil {
-    		fmt.Printf(">>>>>>>>>> %s\n", b)
-    		err = json.Unmarshal(b, &v)
-    		fmt.Printf(">>>>>>>>>> %v\n", v)
-		} else {
-    		msg := fmt.Sprintf("Failed (%s). Path: %s", err, path)
-    		err = errors.New(msg)
-		}
-	}*/
-	return
-}
-
-func ParseEncryptedVote(data []byte) (v *EncryptedVote, err error) {
-	v = &EncryptedVote{}
-	err = json.Unmarshal(data, v)
-	return
-}
-
-// re encode to map
-func (v *Vote) Map() (ret map[string]interface{}, err error) {
-
-	ret = map[string]interface{}{
-		"id":               v.Id,
-		"vote":        		v.Vote,
-		"vote_hash":        v.VoteHash,
-		"election_id":      v.ElectionId,
-		"voter_id":       	v.VoterId,
-	}
-	return
-}
-
-func (v *Vote) Marshal() ([]byte, error) {
-	j, err := v.Map()
-	if err != nil {
-		return []byte(""), err
-	}
-	return util.JsonSortedMarshal(j)
 }
 
 func quadraticResidue(value *big.Int, modulus *big.Int) bool {
@@ -297,4 +296,11 @@ func legendre(value *big.Int, modulus *big.Int) int64 {
 		return t.Int64()
 	}
 	return 0
+}
+
+func HashSha256(str string) string {
+	h256 := sha256.New()
+   	io.WriteString(h256, str)
+	_hashed := h256.Sum(nil)
+	return fmt.Sprintf("%x", _hashed)
 }

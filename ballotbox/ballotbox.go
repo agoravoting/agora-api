@@ -168,7 +168,6 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 	return
 }
 
-// returns the vote corresponding to the given hash
 func (bb *BallotBox) checkHash(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
 	var (
 		v   []Vote
@@ -307,7 +306,6 @@ func (bb *BallotBox) postVote(w http.ResponseWriter, r *http.Request, p httprout
 	return nil
 }
 
-// add the modules to available modules on startup
 func init() {
 	s.Server.AvailableModules = append(s.Server.AvailableModules, &BallotBox{name: "github.com/agoravoting/agora-api/ballotbox"})
 }
