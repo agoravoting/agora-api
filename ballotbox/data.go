@@ -53,7 +53,17 @@ func (v *Vote) validate(electionPks []map[string]*big.Int) error {
     if err != nil {
     	return err
     }
+
     v.Vote = string(encryptedVoteString)
+	h256 := sha256.New()
+   	io.WriteString(h256, v.Vote)
+	_hashed := h256.Sum(nil)
+	hashed := fmt.Sprintf("%x", _hashed)
+
+	if hashed != v.VoteHash {
+		return errors.New("Vote hash mismatch")
+	}
+
     return nil
 }
 
