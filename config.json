@@ -10,5 +10,6 @@
 	],
 	"RavenDSN": "",
 	"electionDir": "admin/elections",
-	"ballotboxSessionExpire": 36000
+	"ballotboxSessionExpire": 36000,
+	"checkResidues": true
 }

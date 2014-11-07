@@ -27,6 +27,7 @@ type BallotBox struct {
 	configs map[string]string
 	pubkeys map[string]string
 	pubkeyObjects map[string][]map[string]*big.Int
+	checkResidues bool
 }
 
 func (bb *BallotBox) Name() string {
@@ -162,6 +163,8 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 		}
 	}
 
+	json.Unmarshal(*cfg["checkResidues"], &bb.checkResidues)
+
 	// add the routes to the server
 	handler := negroni.New(negroni.Wrap(bb.router))
 	s.Server.Mux.OnMux("api/v1/ballotbox", handler)
@@ -280,7 +283,7 @@ func (bb *BallotBox) postVote(w http.ResponseWriter, r *http.Request, p httprout
     if ! ok {
     	return &middleware.HandledError{Err: err, Code: 400, Message: "Pks not found for election", CodedMessage: "vote-pks-not-found"}
     }
-    if err := vote.validate(pks); err != nil {
+    if err := vote.validate(pks, bb.checkResidues); err != nil {
     	return &middleware.HandledError{Err: err, Code: 400, Message: "Vote validation failed", CodedMessage: "vote-validation-failedj"}
     }
 

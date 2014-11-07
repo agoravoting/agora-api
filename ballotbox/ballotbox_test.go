@@ -35,7 +35,8 @@ var (
 		"github.com/agoravoting/agora-api/ballotbox"
 	],
 	"RavenDSN": "",
-    "electionDir": "../admin/elections"
+    "electionDir": "../admin/elections",
+    "checkResidues": true
 }`
 )
 

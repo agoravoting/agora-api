@@ -53,12 +53,12 @@ type ElectionHash struct {
 	Value string `json:"value"`
 }
 
-func (v *Vote) validate(electionPks []map[string]*big.Int) error {
+func (v *Vote) validate(electionPks []map[string]*big.Int, checkResidues bool) error {
 	encryptedVote, err := ParseEncryptedVote([]byte(v.Vote))
     if err != nil {
 		return err
     }
-    if err := encryptedVote.validate(electionPks); err != nil {
+    if err := encryptedVote.validate(electionPks, checkResidues); err != nil {
     	return err
     }
 
@@ -111,7 +111,7 @@ func ParseVote(r *http.Request) (v Vote, err error) {
 }
 
 
-func (e *EncryptedVote) validate(electionPks []map[string]*big.Int) (err error) {
+func (e *EncryptedVote) validate(electionPks []map[string]*big.Int, checkResidues bool) (err error) {
 	if e.A != "encrypted-vote-v1" {
 		return errors.New("Unexpected a value")
 	}
@@ -135,9 +135,16 @@ func (e *EncryptedVote) validate(electionPks []map[string]*big.Int) (err error) 
 	}
 
 	for index, choice := range e.Choices {
-		if err = choice.validate(electionPks[index]); err != nil {
-			return err
+		if checkResidues {
+			if err = choice.validate(electionPks[index]); err != nil {
+				return err
+			}
+		} else {
+			if err = choice.validate(nil); err != nil {
+				return err
+			}
 		}
+
 	}
 	if err = e.checkPopk(electionPks); err != nil {
 		return err
