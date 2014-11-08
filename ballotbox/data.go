@@ -28,7 +28,7 @@ type EncryptedVote struct {
     A string `json:"a"`
     Choices []*Choice `json:"choices"`
     ElectionHash *ElectionHash `json:"election_hash"`
-    IssueDate *time.Time `json:"issue_date"`
+    IssueDate string `json:"issue_date"`
     Proofs []*Popk `json:"proofs"`
 }
 
@@ -66,6 +66,7 @@ func (v *Vote) validate(electionPks []map[string]*big.Int, checkResidues bool) e
     if err != nil {
     	return err
     }
+
     v.Vote = string(encryptedVoteString)
     hashed := HashSha256(v.Vote)
 
@@ -124,7 +125,7 @@ func (e *EncryptedVote) validate(electionPks []map[string]*big.Int, checkResidue
 		return errors.New("Unexpected a value on election hash")
 	}
 
-	if e.IssueDate == nil {
+	if e.IssueDate == "" {
 		return errors.New("Missing issue date")
 	}
 
