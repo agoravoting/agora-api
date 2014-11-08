@@ -37,8 +37,8 @@ def read_csv_to_dicts(path, eid):
         "questions_data": [],
         "title": "votacion-de-candidatos",
         "url": "http://podemos.info",
-        "voting_end_date": "2014-11-10T09:00:00.000000",
-        "voting_start_date": "2014-11-15T00:00:00.000000"
+        "voting_end_date": "2013-12-09T18:17:14.457000",
+        "voting_start_date": "2013-12-06T18:17:14.457000"
     }
 
     base_question = {
