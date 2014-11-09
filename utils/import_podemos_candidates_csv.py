@@ -127,6 +127,6 @@ def read_csv_to_dicts(path, eid):
     return ret
 
 if __name__ == '__main__':
-    data = read_csv_to_dicts(sys.argv[1], sys.argv[2])
+    data = read_csv_to_dicts(sys.argv[1], int(sys.argv[2]))
     print(json.dumps(data,
         indent=4, ensure_ascii=False, sort_keys=True, separators=(',', ': ')))
