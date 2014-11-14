@@ -43,7 +43,7 @@ var moment = require('./moment.js');
 // FIXME copied from voting_booth.js as it is a hassle to import the whole agora view structure
 var encryptAnswer = function(pk_json, plain_answer) {
 
-    var pk = ElGamal.PublicKey.fromJSONObject(pk_json);
+    var pk = ElGamal.PublicKey.fromJSONObject(pk_json[0]);
     var plaintext = new ElGamal.Plaintext(BigInt.fromInt(plain_answer), pk, true);
     var randomness = Random.getRandomInteger(pk.q);
     var ctext = ElGamal.encrypt(pk, plaintext, randomness);
