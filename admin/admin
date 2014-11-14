@@ -94,7 +94,7 @@ def get_db_connection(dbCfg):
 
     return conn
 
-def get_election_config(dir, eopeers_dir):
+def get_election_config(dir, eopeers_dir, force=False):
     path = os.path.join(ELECTIONS_DIR, dir)
 
     if not os.path.isdir(path):
@@ -124,33 +124,39 @@ def get_election_config(dir, eopeers_dir):
         config['election-id'] = os.path.basename(os.path.normpath(dir))
 
     # authorities and director
-    auths_data = get_authdata(eopeers_dir)
-
     authorities = []
-    for auth in auths_data:
-        if auth['hostname'] == config['director']:
-            authorities.insert(0, auth)
-        elif auth['hostname'] in config['authorities']:
+    try:
+        auths_data = get_authdata(eopeers_dir, force)
 
-            authorities.append(auth)
+        for auth in auths_data:
+            if auth['hostname'] == config['director']:
+                authorities.insert(0, auth)
+            elif auth['hostname'] in config['authorities']:
 
-    # check that all requested authorities were found
-    required = list(config['authorities'])
-    required.append(config['director'])
-    required = set(required)
+                authorities.append(auth)
 
-    found = [a['hostname'] for a in authorities]
-    if len(found) != len(required):
-        not_found = str(required - set(found))
-        print("some peers were not found: %s" % not_found)
-        exit(1)
+        # check that all requested authorities were found
+        required = list(config['authorities'])
+        required.append(config['director'])
+        required = set(required)
 
-    config['auths'] = authorities
+        found = [a['hostname'] for a in authorities]
+        if len(found) != len(required):
+            not_found = str(required - set(found))
+            print("some peers were not found: %s" % not_found)
+            exit(1)
 
-    # local host, port
-    localHostname, localPort = get_local_hostport()
-    config['local-hostname'] = localHostname
-    config['local-port'] = localPort
+        config['auths'] = authorities
+
+        # local host, port
+        localHostname, localPort = get_local_hostport()
+        config['local-hostname'] = localHostname
+        config['local-port'] = localPort
+    except:
+        if force:
+            print("get auth data failed. Forcing to continue")
+        else:
+            exit(1)
 
     return config
 
@@ -195,7 +201,7 @@ def get_authdata_for_post(config):
 
     return ret_data
 
-def get_authdata(eopeers_dir):
+def get_authdata(eopeers_dir, force=False):
     if not os.path.isdir(eopeers_dir):
         print("%s is not a directory" % eopeers_dir)
         exit(1)
@@ -203,7 +209,8 @@ def get_authdata(eopeers_dir):
     l = os.listdir(eopeers_dir)
     if len(l) == 0:
         print("%s is an empty directory" % eopeers_dir)
-        exit(1)
+        if not force:
+            exit(1)
 
     auths_data = []
     for fname in os.listdir(eopeers_dir):
@@ -369,8 +376,11 @@ def wait_for_tally():
 
     return ret
 
-def download_tally(cfg, url):
-    path = os.path.join(cfg['electionCfg']['path'], cfg['tally-file'])
+def download_tally(cfg, url, partial):
+    tally_file = cfg['tally-file']
+    if partial > 0:
+      tally_file = tally_file + "." + str(partial)
+    path = os.path.join(cfg['electionCfg']['path'], tally_file)
     print("> Downloading to %s" % path)
     with open(path, 'wb') as handle:
         request = requests.get(url, stream=True, verify=False, cert=(CERT, KEY))
@@ -409,12 +419,15 @@ def create(cfg, args):
 
 def tally(cfg, args, do_start_server = True):
     config = cfg['electionCfg']
+    partial = args.partial
     if do_start_server:
         start_server(config['local-port'])
 
     electionId = config['election-id']
 
     ctexts = cfg['ciphertexts']
+    if partial > 0:
+      ctexts = ctexts + "." + str(partial)
     ctextsPath = os.path.join(config['path'], ctexts)
 
     # need hash
@@ -428,7 +441,7 @@ def tally(cfg, args, do_start_server = True):
 
     if('tally_url' in tallyResponse):
         print("> Downloading tally from " + tallyResponse['tally_url'])
-        download_tally(cfg, tallyResponse['tally_url'])
+        download_tally(cfg, tallyResponse['tally_url'], partial)
     else:
         print("* Tally not found in http data")
 
@@ -464,6 +477,7 @@ def dump_votes_eo(cfg, args):
     f = cfg['ciphertexts']
     path = os.path.join(cfg['electionCfg']['path'], f)
     votes_files = dict()
+    max_size = args.max_count
 
     valid_votes = set()
     check_ids = (len(args.voter_ids_path) > 0)
@@ -477,6 +491,7 @@ def dump_votes_eo(cfg, args):
         votes_files[election_id] = dict(
             total=0,
             filtered=0,
+            partial=0,
             file=codecs.open(path, encoding='utf-8', mode='w+')
         )
 
@@ -491,6 +506,12 @@ def dump_votes_eo(cfg, args):
 
         meta['file'].write(vote['vote'] + "\n")
         meta["total"] += 1
+        if max_size != 0 and meta['total'] % max_size == 0:
+            meta['file'].close()
+            meta['partial'] += 1
+            path = os.path.join(ELECTIONS_DIR, election_id, 'ctexts_%s.%d' % (election_id, meta['partial']))
+            meta['file'] = codecs.open(path, encoding='utf-8', mode='w+')
+            print("creating partial for %s num %d" % (election_id, meta['partial']))
 
     total = 0
     filtered = 0
@@ -663,8 +684,12 @@ eotest <election_dir>: runs a full eo test cycle''')
     parser.add_argument('--eopeers-dir', help='directory with the eopeers packages to use as authorities', default = '/etc/eopeers/')
     parser.add_argument('--ciphertexts', help='file to write ciphertetxs (used in dump, load and encrypt)')
     parser.add_argument('--tally-file', help='the file to save the tally to (used with "tally")')
+    parser.add_argument('--force', help='force to continue even if something strange happens, like /etc/eopeers doesnt exist',
+                        action='store_true')
     parser.add_argument('--plaintexts', help='json file to read votes from when encrypting', default = 'votes.json')
     parser.add_argument('--encrypt-count', help='number of votes to encrypt (generates duplicates if more than in json file)', type=int, default = 0)
+    parser.add_argument('-m', '--max-count', help='when creating doing a dump, maximum size of each dump part', type=int, default=0)
+    parser.add_argument('-p', '--partial', help='partial of which to do the tally', type=int, default=-1)
     parser.add_argument('-f', '--filters', nargs='+', default=[], help="key==value(s) filters for queries (use ~ for like)")
     parser.add_argument('--voter-ids-path', nargs='?', default=[], help="Path to a file with valid voter ids for filtering")
     args = parser.parse_args()
@@ -681,7 +706,7 @@ eotest <election_dir>: runs a full eo test cycle''')
         elif command not in ["list_elections"]:
             # election-specific commands
             if len(args.command) >= 2:
-                electionConfig = get_election_config(args.command[1], args.eopeers_dir)
+                electionConfig = get_election_config(args.command[1], args.eopeers_dir, args.force)
                 config['electionCfg'] = electionConfig
 
                 config['plaintexts'] = args.plaintexts
