@@ -500,7 +500,10 @@ def dump_votes_eo(cfg, args):
 
         # filter only for valid votes
         if check_ids:
-            if vote['voter_id'] not in valid_votes:
+            if not args.invalid and vote['voter_id'] not in valid_votes:
+                meta["filtered"] += 1
+                continue
+            elif args.invalid and vote['voter_id'] in valid_votes:
                 meta["filtered"] += 1
                 continue
 
@@ -686,6 +689,7 @@ eotest <election_dir>: runs a full eo test cycle''')
     parser.add_argument('--tally-file', help='the file to save the tally to (used with "tally")')
     parser.add_argument('--force', help='force to continue even if something strange happens, like /etc/eopeers doesnt exist',
                         action='store_true')
+    parser.add_argument('--invalid', help='voter ids path are the invalid', action='store_true')
     parser.add_argument('--plaintexts', help='json file to read votes from when encrypting', default = 'votes.json')
     parser.add_argument('--encrypt-count', help='number of votes to encrypt (generates duplicates if more than in json file)', type=int, default = 0)
     parser.add_argument('-m', '--max-count', help='when creating doing a dump, maximum size of each dump part', type=int, default=0)
