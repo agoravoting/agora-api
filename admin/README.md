@@ -7,7 +7,8 @@ Installation
 
 Python dependencies
 
-    pip install SQLAlchemy, psycopg2, PrettyTable, argsparse, requests
+    mkvirtualenv agora-api
+    pip install -r requirements.txt
 
 eopeers: set public ip, private ip, hostname, port at top of file
 
