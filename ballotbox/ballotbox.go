@@ -28,6 +28,7 @@ type BallotBox struct {
 	pubkeys map[string]string
 	pubkeyObjects map[string][]map[string]*big.Int
 	checkResidues bool
+	electionDir string
 }
 
 func (bb *BallotBox) Name() string {
@@ -35,10 +36,6 @@ func (bb *BallotBox) Name() string {
 }
 
 func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
-	bb.configs = make(map[string]string)
-	bb.pubkeys = make(map[string]string)
-	bb.pubkeyObjects = make(map[string][]map[string]*big.Int)
-
 	var ballotboxSessionExpire int
 	json.Unmarshal(*cfg["ballotboxSessionExpire"], &ballotboxSessionExpire)
 	var maxWrites int
@@ -59,6 +56,11 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 	bb.router.GET("/election/:election_id/pubkeys", middleware.Join(
 		s.Server.ErrorWrap.Do(bb.getElectionPubKeys)))
 
+	// admin routes
+	bb.router.POST("/reload-config", middleware.Join(
+		s.Server.ErrorWrap.Do(bb.reloadConfig),
+		s.Server.CheckPerms("admin", ballotboxSessionExpire)))
+
 	// setup prepared sql queries
 	if bb.insertStmt, err = s.Server.Db.Preparex("SELECT set_vote($1, $2, $3, $4, $5, $6)"); err != nil {
 		return
@@ -67,20 +69,40 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 		return
 	}
 
-	// initialize election cfgs to return in getConfig
 	var electionDir string
 	json.Unmarshal(*cfg["electionDir"], &electionDir)
 	s.Server.Logger.Printf("Loading cfgs from %s", electionDir)
+	bb.electionDir = electionDir
 
-	files, err := ioutil.ReadDir(electionDir)
+	// initialize election cfgs to return in getConfig
+	err = bb.readElections()
 	if(err != nil) {
+		return
+	}
+
+	json.Unmarshal(*cfg["checkResidues"], &bb.checkResidues)
+
+	// add the routes to the server
+	handler := negroni.New(negroni.Wrap(bb.router))
+	s.Server.Mux.OnMux("api/v1/ballotbox", handler)
+	return
+}
+
+func (bb *BallotBox) readElections() (err error) {
+	bb.configs = make(map[string]string)
+	bb.pubkeys = make(map[string]string)
+	bb.pubkeyObjects = make(map[string][]map[string]*big.Int)
+
+	files, err := ioutil.ReadDir(bb.electionDir)
+	if(err != nil) {
+		s.Server.Logger.Printf("Could not read election dir at %s", bb.electionDir)
 		return
 	}
 
 	for _, f := range files {
 		if(f.IsDir()) {
 			// read config.json
-			cfgPath := path.Join(electionDir, f.Name(), "config.json")
+			cfgPath := path.Join(bb.electionDir, f.Name(), "config.json")
 			var cfgText string
 			cfgText, err = util.Contents(cfgPath)
 			if(err != nil) {
@@ -107,7 +129,7 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 			bb.configs[electionId] = cfgText
 
 			// read pk_<election-id>
-			pkPath := path.Join(electionDir, f.Name(), "pk_" + electionId)
+			pkPath := path.Join(bb.electionDir, f.Name(), "pk_" + electionId)
 			var pkText string
 			if _, err := os.Stat(pkPath); os.IsNotExist(err) {
 				s.Server.Logger.Printf("No pubkey at %s", pkPath)
@@ -163,11 +185,6 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 		}
 	}
 
-	json.Unmarshal(*cfg["checkResidues"], &bb.checkResidues)
-
-	// add the routes to the server
-	handler := negroni.New(negroni.Wrap(bb.router))
-	s.Server.Mux.OnMux("api/v1/ballotbox", handler)
 	return
 }
 
@@ -305,6 +322,18 @@ func (bb *BallotBox) postVote(w http.ResponseWriter, r *http.Request, p httprout
 	w.Header().Set("Content-Type", "application/json")
 	var json = fmt.Sprintf("{\"updated\": \"%s\"}", updated)
 	w.Write([]byte(json))
+
+	return nil
+}
+
+func (bb *BallotBox) reloadConfig(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
+	err := bb.readElections()
+	if(err != nil) {
+		return &middleware.HandledError{Err: err, Code: 500, Message: "Error calling set_vote", CodedMessage: "error-upsert"}
+	}
+	w.WriteHeader(http.StatusAccepted)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte("{}"))
 
 	return nil
 }

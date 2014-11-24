@@ -54,6 +54,8 @@ func TestAgoraApi(t *testing.T) {
 	ts := stest.New(t, Config)
 	defer ts.TearDown()
 	voteAuth := map[string]string{"Authorization": middleware.AuthHeader("voter-1020-1", SharedSecret)}
+    adminAuth := map[string]string{"Authorization": middleware.AuthHeader("admin", SharedSecret)}
+    fmt.Printf("%v", adminAuth)
 
 	posted := ts.RequestJson("POST", "/api/v1/ballotbox/election/1020/vote/1", http.StatusAccepted, voteAuth, newVoteJson)
 	fmt.Printf("new vote %v\n", posted)
@@ -65,24 +67,12 @@ func TestAgoraApi(t *testing.T) {
 
     // will only work if there is an election (config.json) with election-id 1020 in admin/elections
     ts.Request("GET", "/api/v1/ballotbox/election/1020/config/1", http.StatusOK, voteAuth, "")
+
+    ts.RequestJson("POST", "/api/v1/ballotbox/reload-config", http.StatusAccepted, adminAuth, "{}")
 }
 
 // used to benchmark a remote server
 func BenchmarkApi(b *testing.B) {
-    // reads config from config.json
-    /* confStr, err := util.Contents("../config.json")
-    if err != nil {
-        b.Errorf("error reading config %v", err)
-        return
-    }
-    var s map[string]interface{}
-    err = json.Unmarshal([]byte(confStr), &s)
-    if err != nil {
-        b.Errorf("error parsing config %v", err)
-        return
-    }
-
-    secret := s["SharedSecret"].(string)*/
     secret := SharedSecret
 
 	b.ResetTimer()
@@ -111,38 +101,6 @@ func BenchmarkApi(b *testing.B) {
 	    	}
 	    }
 	})
-
-    /*c := make(chan string)
-    start := time.Now()
-
-    routines := 30
-
-    for j:= 0; j < routines; j++ {
-    	go func(){
-    		for i := 0; i < 10; i++ {
-	    		now := time.Now()
-	        	voterId := now.Nanosecond()
-	        	header := fmt.Sprintf("voter-1306-%d", voterId)
-                url := fmt.Sprintf("https://%s:%d/api/v1/ballotbox/election/1306/config/%d", *host, port, voterId)
-                voteAuth := map[string]string{"Authorization": middleware.AuthHeader(header, secret)}
-                // resp := request("POST", url, voteAuth, newVoteJson, b)
-                fmt.Printf("=>")
-                resp := request("GET", url, voteAuth, "", b)
-                fmt.Printf("|")
-                // if resp != nil && resp.StatusCode != http.StatusAccepted {
-                if resp != nil && resp.StatusCode != http.StatusOK {
-                    b.Errorf("bad status code %d", resp.StatusCode)
-                }
-	        }
-        	c <- "ok"
-		}()
-    }
-
-    for j:= 0; j < routines; j++ {
-    	<- c
-    }
-    delta := time.Now().Sub(start)
-    fmt.Printf("elapsed %f", float64(delta) / 1000000000)*/
 
     return
 }

@@ -643,6 +643,18 @@ def console(cfg, args):
     conn = get_db_connection(cfg['backendCfg']['db'])
     import pdb; pdb.set_trace()
 
+def reload_config(cfg, args):
+    import hmac
+
+    secret = cfg['backendCfg']['SharedSecret']
+    message = 'admin:%d' % int(time.time())
+    _hmac = hmac.new(str(secret), str(message), hashlib.sha256).hexdigest()
+    auth = '%s:%s' % (message,_hmac)
+    headers = {'content-type': 'application/json', 'Authorization': auth}
+    url = 'http://localhost:%d/api/v1/ballotbox/reload-config' % args.ballotbox_port
+    r = requests.post(url, data='{}', headers=headers)
+    print(r.status_code)
+
 def __load_votes_full(cfg):
     conn = get_db_connection(cfg['backendCfg']['db'])
     votes = votes_table()
@@ -696,6 +708,7 @@ eotest <election_dir>: runs a full eo test cycle''')
     parser.add_argument('-p', '--partial', help='partial of which to do the tally', type=int, default=-1)
     parser.add_argument('-f', '--filters', nargs='+', default=[], help="key==value(s) filters for queries (use ~ for like)")
     parser.add_argument('--voter-ids-path', nargs='?', default=[], help="Path to a file with valid voter ids for filtering")
+    parser.add_argument('--ballotbox-port', help='the port that the ballotbox is listening on', type=int, default = 3000)
     args = parser.parse_args()
     command = args.command[0]
     if hasattr(__main__, command):
@@ -705,9 +718,9 @@ eotest <election_dir>: runs a full eo test cycle''')
         }
 
         if command == "console":
-          console(config, args)
+            console(config, args)
 
-        elif command not in ["list_elections"]:
+        elif command not in ["list_elections", "reload_config"]:
             # election-specific commands
             if len(args.command) >= 2:
                 electionConfig = get_election_config(args.command[1], args.eopeers_dir, args.force)
