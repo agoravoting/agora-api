@@ -75,7 +75,7 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 	bb.electionDir = electionDir
 
 	// initialize election cfgs to return in getConfig
-	err = bb.readElections()
+	err = bb.readElectionCfgs()
 	if(err != nil) {
 		return
 	}
@@ -88,10 +88,10 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 	return
 }
 
-func (bb *BallotBox) readElections() (err error) {
-	bb.configs = make(map[string]string)
-	bb.pubkeys = make(map[string]string)
-	bb.pubkeyObjects = make(map[string][]map[string]*big.Int)
+func (bb *BallotBox) readElectionCfgs() (err error) {
+	var configs = make(map[string]string)
+	var pubkeys = make(map[string]string)
+	var pubkeyObjects = make(map[string][]map[string]*big.Int)
 
 	files, err := ioutil.ReadDir(bb.electionDir)
 	if(err != nil) {
@@ -126,7 +126,7 @@ func (bb *BallotBox) readElections() (err error) {
 			}
 
 			s.Server.Logger.Printf("Loaded config file for election %s", electionId)
-			bb.configs[electionId] = cfgText
+			configs[electionId] = cfgText
 
 			// read pk_<election-id>
 			pkPath := path.Join(bb.electionDir, f.Name(), "pk_" + electionId)
@@ -148,7 +148,7 @@ func (bb *BallotBox) readElections() (err error) {
 				s.Server.Logger.Printf("Error reading pubkey file %s %v, skipping", pkPath, err)
 				continue
 			}
-			bb.pubkeys[electionId] = pkText
+			pubkeys[electionId] = pkText
 
 			var pksDecoded []interface{}
 			if err := json.Unmarshal([]byte(pkText), &pksDecoded); err != nil {
@@ -181,9 +181,13 @@ func (bb *BallotBox) readElections() (err error) {
 
         		keys[index] = key
     		}
-    		bb.pubkeyObjects[electionId] = keys
+    		pubkeyObjects[electionId] = keys
 		}
 	}
+
+	bb.configs = configs
+	bb.pubkeys = pubkeys
+	bb.pubkeyObjects = pubkeyObjects
 
 	return
 }
@@ -327,7 +331,7 @@ func (bb *BallotBox) postVote(w http.ResponseWriter, r *http.Request, p httprout
 }
 
 func (bb *BallotBox) reloadConfig(w http.ResponseWriter, r *http.Request, p httprouter.Params) *middleware.HandledError {
-	err := bb.readElections()
+	err := bb.readElectionCfgs()
 	if(err != nil) {
 		return &middleware.HandledError{Err: err, Code: 500, Message: "Error calling set_vote", CodedMessage: "error-upsert"}
 	}
