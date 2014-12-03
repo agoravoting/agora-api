@@ -50,9 +50,8 @@ func (bb *BallotBox) Init(cfg map[string]*json.RawMessage) (err error) {
 	bb.router.GET("/election/:election_id/check-hash/:voter_id/:vote_hash", middleware.Join(
 		s.Server.ErrorWrap.Do(bb.checkHash),
 		s.Server.CheckPerms("voter-${election_id}-${voter_id}", ballotboxSessionExpire)))
-	bb.router.GET("/election/:election_id/config/:voter_id", middleware.Join(
-		s.Server.ErrorWrap.Do(bb.getElectionConfig),
-		s.Server.CheckPerms("voter-${election_id}-${voter_id}", ballotboxSessionExpire)))
+	bb.router.GET("/election/:election_id/config", middleware.Join(
+		s.Server.ErrorWrap.Do(bb.getElectionConfig)))
 	bb.router.GET("/election/:election_id/pubkeys", middleware.Join(
 		s.Server.ErrorWrap.Do(bb.getElectionPubKeys)))
 
@@ -237,12 +236,8 @@ func (bb *BallotBox) getElectionConfig(w http.ResponseWriter, r *http.Request, p
 	s.Server.Logger.Printf("getElectionConfig")
 
 	electionId := p.ByName("election_id")
-	voterId := p.ByName("voter_id")
 	if electionId == "" {
 		return &middleware.HandledError{Err: err, Code: 400, Message: "No election_id", CodedMessage: "empty-election-id"}
-	}
-	if voterId == "" {
-		return &middleware.HandledError{Err: err, Code: 400, Message: "No voter_id", CodedMessage: "empty-voter-id"}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
