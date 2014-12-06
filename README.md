@@ -45,6 +45,8 @@ To run the tests you can execute:
     chmod u+x ballotbox/test.sh
     ballotbox/test.sh
 
+Tests uses the test election which is in the repository, admin/elections/1020
+
 # Benchmarks
 
 You can benchmark a running server with:
