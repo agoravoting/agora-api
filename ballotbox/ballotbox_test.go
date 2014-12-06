@@ -71,6 +71,28 @@ func TestAgoraApi(t *testing.T) {
     ts.RequestJson("POST", "/api/v1/ballotbox/reload-config", http.StatusAccepted, adminAuth, "{}")
 }
 
+func TestAgoraApiDuplicateHash(t *testing.T) {
+	ts := stest.New(t, Config)
+	defer ts.TearDown()
+	voteAuth := map[string]string{"Authorization": middleware.AuthHeader("voter-1020-1", SharedSecret)}
+	voteAuth2 := map[string]string{"Authorization": middleware.AuthHeader("voter-1020-2", SharedSecret)}
+
+	// Adding a new vote with other user and the same hash
+	// This shouldn't add nothing to the database because the duplicate hash
+	// The updated return will be false because nothing changes
+	posted := ts.RequestJson("POST", "/api/v1/ballotbox/election/1020/vote/2", http.StatusAccepted, voteAuth2, newVoteJson)
+	fmt.Printf("new vote %v\n", posted)
+	p := posted.(map[string]interface{})
+	if p["updated"] == "true" {
+		t.Fatalf("A row has been updated and shouldn't because the duplicate hash")
+	}
+
+	foundVote := ts.Request("GET", fmt.Sprintf("/api/v1/ballotbox/election/1020/check-hash/1/%s", newVoteHash), http.StatusOK, voteAuth, "")
+	fmt.Printf("found vote %v\n", foundVote)
+	foundVote = ts.Request("GET", fmt.Sprintf("/api/v1/ballotbox/election/1020/check-hash/2/%s", newVoteHash), http.StatusNotFound, voteAuth2, "")
+	fmt.Printf("found vote %v\n", foundVote)
+}
+
 // used to benchmark a remote server
 func BenchmarkApi(b *testing.B) {
     secret := SharedSecret
